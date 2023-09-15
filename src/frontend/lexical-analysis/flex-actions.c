@@ -1,7 +1,8 @@
-#include "../../backend/support/logger.h"
-#include "flex-actions.h"
 #include <stdlib.h>
 #include <string.h>
+
+#include "../../backend/support/logger.h"
+#include "flex-actions.h"
 
 /**
  * Implementación de "flex-actions.h".

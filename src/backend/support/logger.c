@@ -1,6 +1,7 @@
-#include "logger.h"
 #include <stdarg.h>
 #include <stdio.h>
+
+#include "logger.h"
 
 /**
  * Implementación de "logger.h".

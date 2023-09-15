@@ -1,8 +1,9 @@
+#include <stdio.h>
+
 #include "backend/code-generation/generator.h"
 #include "backend/support/logger.h"
 #include "backend/support/shared.h"
 #include "frontend/syntactic-analysis/bison-parser.h"
-#include <stdio.h>
 
 // Estado de la aplicación.
 CompilerState state;
