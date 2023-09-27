@@ -15,6 +15,8 @@
 int ProgramGrammarAction(const int value);
 
 // Expresión.
+int ContractDefinitionGrammarAction(const char *contractName);
+int BlockGrammarAction(const int value);
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue);
 int SubtractionExpressionGrammarAction(const int leftValue, const int rightValue);
 int MultiplicationExpressionGrammarAction(const int leftValue, const int rightValue);

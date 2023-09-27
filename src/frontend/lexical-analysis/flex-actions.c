@@ -34,10 +34,39 @@ void EndCommentPatternAction() {
 	LogDebug("[Flex] [COMMENT] EndCommentPatternAction..............................");
 }
 
+token KeywordPatternAction(const char * lexeme, token token) {
+	LogDebug("[Flex] KeywordPatternAction: '%s' with %d.\n", lexeme, token);
+	yylval.token = token;
+	return token;
+}
+
+token IdentifierPatternAction(const char * lexeme, const int length) {
+	LogDebug("[Flex] IdentifierPatternAction: '%s' (length = %d).", lexeme, length);
+	yylval.string = strndup(lexeme, length);
+	return IDENTIFIER;
+}
+
 token AdditionOperatorPatternAction() {
 	LogDebug("[Flex] AdditionOperatorPatternAction: '+'.");
 	yylval.token = ADD;
 	return ADD;
+}
+
+token OpenCurlyBracketPatternAction() {
+	LogDebug("[Flex] OpenCurlyBracketPatternAction: '{'.");
+	yylval.token = OPEN_CURLY_BRACKET;
+	return OPEN_CURLY_BRACKET;
+}
+
+token CloseCurlyBracketPatternAction() {
+	LogDebug("[Flex] CloseCurlyBracketPatternAction: '}'.");
+	yylval.token = CLOSE_CURLY_BRACKET;
+	return CLOSE_CURLY_BRACKET;
+}
+token OpenParenthesisPatternAction() {
+	LogDebug("[Flex] OpenParenthesisPatternAction: '('.");
+	yylval.token = OPEN_PARENTHESIS;
+	return OPEN_PARENTHESIS;
 }
 
 token CloseParenthesisPatternAction() {
@@ -66,11 +95,6 @@ token MultiplicationOperatorPatternAction() {
 	return MUL;
 }
 
-token OpenParenthesisPatternAction() {
-	LogDebug("[Flex] OpenParenthesisPatternAction: '('.");
-	yylval.token = OPEN_PARENTHESIS;
-	return OPEN_PARENTHESIS;
-}
 
 token SubtractionOperatorPatternAction() {
 	LogDebug("[Flex] SubtractionOperatorPatternAction: '-'.");

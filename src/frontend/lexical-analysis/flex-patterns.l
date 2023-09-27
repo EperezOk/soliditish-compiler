@@ -18,6 +18,7 @@
 
 /* Patrones reutilizables. */
 digit			[0-9]
+character       [a-zA-Z]
 endline			[\n]
 whitespace		[ \f\n\r\t\v]
 
@@ -28,15 +29,21 @@ whitespace		[ \f\n\r\t\v]
 <COMMENT>{endline}+							{ IgnoredPatternAction(yytext, yyleng); }
 <COMMENT>"*/"								{ EndCommentPatternAction(); BEGIN(INITIAL); }
 
+"contract"								    { return KeywordPatternAction(yytext, CONTRACT); }
+
 "+"											{ return AdditionOperatorPatternAction(); }
 "-"											{ return SubtractionOperatorPatternAction(); }
 "*"											{ return MultiplicationOperatorPatternAction(); }
 "/"											{ return DivisionOperatorPatternAction(); }
 
+"{"											{ return OpenCurlyBracketPatternAction(); }
+"}"											{ return CloseCurlyBracketPatternAction(); }
 "("											{ return OpenParenthesisPatternAction(); }
 ")"											{ return CloseParenthesisPatternAction(); }
 
 {digit}+									{ return IntegerPatternAction(yytext, yyleng); }
+
+({character}|_)({character}|_|{digit})*	            { return IdentifierPatternAction(yytext, yyleng); }
 
 {whitespace}+								{ IgnoredPatternAction(yytext, yyleng); }
 

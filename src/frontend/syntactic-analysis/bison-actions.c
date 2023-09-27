@@ -50,6 +50,16 @@ int ProgramGrammarAction(const int value) {
 	return value;
 }
 
+int ContractDefinitionGrammarAction(const char *contractName) {
+	LogDebug("[Bison] ContractDefinitionGrammarAction(%s)", contractName);
+	return 0;
+}
+
+int BlockGrammarAction(const int value) {
+	LogDebug("[Bison] BlockGrammarAction(%d)", value);
+	return value;
+}
+
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue) {
 	LogDebug("[Bison] AdditionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
 	return Add(leftValue, rightValue);
