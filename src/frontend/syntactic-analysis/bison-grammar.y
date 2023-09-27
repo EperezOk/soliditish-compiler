@@ -19,9 +19,13 @@
 	int program;
 	int contract_definition;
 	int block;
+	int instructions;
+	int instruction;
+	int variable_definition;
 	int expression;
 	int factor;
 	int constant;
+	const char *initialization;
 
 	// Terminales.
 	token token;
@@ -34,6 +38,9 @@
 
 // Keywords
 %token <token> CONTRACT
+%token <token> ERC20
+%token <token> EOL
+%token <token> EQ
 
 // IDs y tipos de los tokens terminales generados desde Flex.
 %token <token> ADD
@@ -48,12 +55,17 @@
 
 // Tipos de dato
 %token <string> IDENTIFIER
+%token <string> ADDRESS
 %token <integer> INTEGER
 
 // Tipos de dato para los no-terminales generados desde Bison.
 %type <program> program
 %type <contract_definition> contract_definition
 %type <block> block
+%type <instructions> instructions
+%type <instruction> instruction
+%type <variable_definition> variable_definition
+%type <initialization> initialization
 %type <expression> expression
 %type <factor> factor
 %type <constant> constant
@@ -67,15 +79,28 @@
 
 %%
 
-program: expression													{ $$ = ProgramGrammarAction($1); }
-	| contract_definition											{ $$ = ProgramGrammarAction($1); }
+program: contract_definition										{ $$ = ProgramGrammarAction($1); }
 	;
 
 contract_definition: CONTRACT IDENTIFIER block						{ $$ = ContractDefinitionGrammarAction($2); }
 	;
 
-block: OPEN_CURLY_BRACKET CLOSE_CURLY_BRACKET						{ $$ = BlockGrammarAction(0); }
-	| OPEN_CURLY_BRACKET expression CLOSE_CURLY_BRACKET				{ $$ = BlockGrammarAction($2); }
+block: OPEN_CURLY_BRACKET instructions CLOSE_CURLY_BRACKET			{ $$ = BlockGrammarAction($2); }
+	;
+
+instructions: instructions instruction								{ $$ = InstructionsGrammarAction($1, $2); }
+	|																{ $$ = EmptyInstructionGrammarAction(); }
+	;
+
+instruction: variable_definition EOL								{ $$ = VariableDefinitionGrammarAction(); }		
+	;
+
+variable_definition: ERC20 IDENTIFIER initialization				{ $$ = ERC20DefinitionGrammarAction($2, $3); }
+	;
+
+initialization: EQ IDENTIFIER										{ $$ = InitializationGrammarAction($2); }
+	| EQ ADDRESS													{ $$ = InitializationGrammarAction($2);}
+	|																{ $$ = EmptyInitializationGrammarAction();}
 	;
 
 expression: expression[left] ADD expression[right]					{ $$ = AdditionExpressionGrammarAction($left, $right); }

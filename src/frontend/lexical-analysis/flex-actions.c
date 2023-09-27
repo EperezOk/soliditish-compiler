@@ -40,8 +40,8 @@ token KeywordPatternAction(const char * lexeme, token token) {
 	return token;
 }
 
-token IdentifierPatternAction(const char * lexeme, const int length) {
-	LogDebug("[Flex] IdentifierPatternAction: '%s' (length = %d).", lexeme, length);
+token StringValuePatternAction(const char * lexeme, const int length) {
+	LogDebug("[Flex] StringValuePatternAction: '%s' (length = %d).", lexeme, length);
 	yylval.string = strndup(lexeme, length);
 	return IDENTIFIER;
 }

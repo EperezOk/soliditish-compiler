@@ -57,7 +57,37 @@ int ContractDefinitionGrammarAction(const char *contractName) {
 
 int BlockGrammarAction(const int value) {
 	LogDebug("[Bison] BlockGrammarAction(%d)", value);
-	return value;
+	return 0;
+}
+
+int InstructionsGrammarAction(const int instructions, const int instruction) {
+	LogDebug("[Bison] InstructionsGrammarAction(%d, %d)", instructions, instruction);
+	return 0;
+}
+
+int ERC20DefinitionGrammarAction(const char *identifier, const char *initialization) {
+	LogDebug("[Bison] ERC20DefinitionGrammarAction(%s, %s)", identifier, initialization);
+	return 0;
+}
+
+int EmptyInstructionGrammarAction() {
+	LogDebug("[Bison] EmptyInstructionsGrammarAction");
+	return 0;
+}
+
+int VariableDefinitionGrammarAction() {
+	LogDebug("[Bison] VariableDefinitionGrammarAction");
+	return 0;
+}
+
+const char *InitializationGrammarAction(const char *identifier) {
+	LogDebug("[Bison] InitializationGrammarAction(%s)", identifier);
+	return identifier;
+}
+
+const char *EmptyInitializationGrammarAction() {
+	LogDebug("[Bison] EmptyInitializationGrammarAction");
+	return 0;
 }
 
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue) {

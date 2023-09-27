@@ -17,6 +17,16 @@ int ProgramGrammarAction(const int value);
 // Expresión.
 int ContractDefinitionGrammarAction(const char *contractName);
 int BlockGrammarAction(const int value);
+int InstructionsGrammarAction(const int instructions, const int instruction);
+int VariableDefinitionGrammarAction();
+
+// Instruction
+int ERC20DefinitionGrammarAction(const char *identifier, const char *initialization);
+int EmptyInstructionGrammarAction();
+const char *InitializationGrammarAction(const char *identifier);
+const char *EmptyInitializationGrammarAction();
+
+
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue);
 int SubtractionExpressionGrammarAction(const int leftValue, const int rightValue);
 int MultiplicationExpressionGrammarAction(const int leftValue, const int rightValue);

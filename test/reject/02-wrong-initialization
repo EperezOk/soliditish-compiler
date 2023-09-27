@@ -1,0 +1,5 @@
+contract TokenMinter {
+    // Las propiedades son privadas por defecto
+    
+    ERC20 token = ;
+}

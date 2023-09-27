@@ -14,22 +14,30 @@
 %option yylineno
 
 /* Contextos de Flex. */
-%x COMMENT
+%x BLOCK_COMMENT
+%x LINE_COMMENT
 
 /* Patrones reutilizables. */
 digit			[0-9]
 character       [a-zA-Z]
 endline			[\n]
 whitespace		[ \f\n\r\t\v]
+address         0x[a-fA-F0-9]{40}
 
 %%
 
-"/*"										{ BEGIN(COMMENT); BeginCommentPatternAction(); }
-<COMMENT>.									{ IgnoredPatternAction(yytext, yyleng); }
-<COMMENT>{endline}+							{ IgnoredPatternAction(yytext, yyleng); }
-<COMMENT>"*/"								{ EndCommentPatternAction(); BEGIN(INITIAL); }
+"/*"										{ BEGIN(BLOCK_COMMENT); BeginCommentPatternAction(); }
+<BLOCK_COMMENT>.						    { IgnoredPatternAction(yytext, yyleng); }
+<BLOCK_COMMENT>{endline}+					{ IgnoredPatternAction(yytext, yyleng); }
+<BLOCK_COMMENT>"*/"							{ EndCommentPatternAction(); BEGIN(INITIAL); }
+
+"//"										{ BEGIN(LINE_COMMENT); BeginCommentPatternAction(); }
+<LINE_COMMENT>.							    { IgnoredPatternAction(yytext, yyleng); }
+<LINE_COMMENT>\n							{ EndCommentPatternAction(); BEGIN(INITIAL); }
 
 "contract"								    { return KeywordPatternAction(yytext, CONTRACT); }
+
+"ERC20"                                     { return KeywordPatternAction(yytext, ERC20); }
 
 "+"											{ return AdditionOperatorPatternAction(); }
 "-"											{ return SubtractionOperatorPatternAction(); }
@@ -43,7 +51,13 @@ whitespace		[ \f\n\r\t\v]
 
 {digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
-({character}|_)({character}|_|{digit})*	            { return IdentifierPatternAction(yytext, yyleng); }
+({character}|_)({character}|_|{digit})*	    { return StringValuePatternAction(yytext, yyleng); }
+
+{address}                                   { return StringValuePatternAction(yytext, yyleng); }
+
+"="                                         { return KeywordPatternAction(yytext, EQ); }
+
+";"                                         { return KeywordPatternAction(yytext, EOL); }
 
 {whitespace}+								{ IgnoredPatternAction(yytext, yyleng); }
 
