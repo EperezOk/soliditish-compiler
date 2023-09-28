@@ -40,10 +40,10 @@ token KeywordPatternAction(const char * lexeme, token token) {
 	return token;
 }
 
-token StringValuePatternAction(const char * lexeme, const int length) {
+token StringValuePatternAction(const char * lexeme, const int length, token token) {
 	LogDebug("[Flex] StringValuePatternAction: '%s' (length = %d).", lexeme, length);
 	yylval.string = strndup(lexeme, length);
-	return IDENTIFIER;
+	return token;
 }
 
 token AdditionOperatorPatternAction() {
@@ -63,6 +63,7 @@ token CloseCurlyBracketPatternAction() {
 	yylval.token = CLOSE_CURLY_BRACKET;
 	return CLOSE_CURLY_BRACKET;
 }
+
 token OpenParenthesisPatternAction() {
 	LogDebug("[Flex] OpenParenthesisPatternAction: '('.");
 	yylval.token = OPEN_PARENTHESIS;
@@ -73,6 +74,18 @@ token CloseParenthesisPatternAction() {
 	LogDebug("[Flex] CloseParenthesisPatternAction: ')'.");
 	yylval.token = CLOSE_PARENTHESIS;
 	return CLOSE_PARENTHESIS;
+}
+
+token OpenSquareBracketPatternAction() {
+	LogDebug("[Flex] OpenSquareBracketPatternAction: '['.");
+	yylval.token = OPEN_SQUARE_BRACKET;
+	return OPEN_SQUARE_BRACKET;
+}
+
+token CloseSquareBracketPatternAction() {
+	LogDebug("[Flex] CloseSquareBracketPatternAction: ']'.");
+	yylval.token = CLOSE_SQUARE_BRACKET;
+	return CLOSE_SQUARE_BRACKET;
 }
 
 token CommaPatternAction() {

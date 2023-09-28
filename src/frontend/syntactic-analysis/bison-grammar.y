@@ -45,11 +45,9 @@
 // Keywords
 %token <token> CONTRACT
 %token <token> FUNCTION
-%token <token> ERC20
-%token <token> EOL
-%token <token> EQ
 
 // IDs y tipos de los tokens terminales generados desde Flex.
+%token <string> IDENTIFIER
 %token <token> ADD
 %token <token> SUB
 %token <token> MUL
@@ -59,11 +57,26 @@
 %token <token> CLOSE_CURLY_BRACKET
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
+%token <token> OPEN_SQUARE_BRACKET
+%token <token> CLOSE_SQUARE_BRACKET
+%token <token> EOL
+%token <token> EQ
 %token <token> COMMA
 
 // Tipos de dato
-%token <string> IDENTIFIER
+%token <token> T_ERC20
+%token <token> T_ERC721
+%token <token> T_BYTES
+%token <token> T_STRING
+%token <token> T_BOOLEAN
+%token <token> T_ADDRESS
+%token <token> T_UINT
+%token <token> T_INT
+
+// Constantes
 %token <string> ADDRESS
+%token <string> BOOLEAN
+%token <string> STRING
 %token <integer> INTEGER
 
 // Tipos de dato para los no-terminales generados desde Bison.
@@ -99,7 +112,7 @@ program: contract_definition													{ $$ = ProgramGrammarAction($1); }
 contract_definition: CONTRACT IDENTIFIER contract_block							{ $$ = ContractDefinitionGrammarAction($2); }
 	;
 
-contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ $$ = BlockGrammarAction($2);}
+contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ $$ = BlockGrammarAction($2); }
 	;
 
 function_block: OPEN_CURLY_BRACKET function_instructions CLOSE_CURLY_BRACKET	{ $$ = BlockGrammarAction($2); }
@@ -120,23 +133,36 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 function_instruction: data_type IDENTIFIER initialization EOL					{ $$ = VariableDefinitionGrammarAction($1, $2, $3); }
 	;
 
-data_type: ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
+data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
+	| T_ERC721																	{ $$ = 0; }
+	| T_BYTES																	{ $$ = 0; }
+	| T_STRING																	{ $$ = 0; }
+	| T_BOOLEAN																	{ $$ = 0; }
+	| T_ADDRESS																	{ $$ = 0; }
+	| T_UINT																	{ $$ = 0; }
+	| T_INT																		{ $$ = 0; }
+	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = 0; }
+	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
 
 initialization: EQ IDENTIFIER													{ $$ = InitializationGrammarAction($2); }
-	| EQ ADDRESS																{ $$ = InitializationGrammarAction($2);}
-	|																			{ $$ = EmptyInitializationGrammarAction();}
+	| EQ ADDRESS																{ $$ = InitializationGrammarAction($2); }
+	| EQ INTEGER																{ $$ = 0; }
+	| EQ BOOLEAN																{ $$ = 0; }
+	| EQ STRING																	{ $$ = 0; }
+	|																			{ $$ = EmptyInitializationGrammarAction(); }
 	;
 
-function_definition: FUNCTION IDENTIFIER argument_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2);}
+
+function_definition: FUNCTION IDENTIFIER argument_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2); }
 	;
 
-argument_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction();}
-	| OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction();}
+argument_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction(); }
+	| OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction(); }
 	;
 
-arguments: arguments COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction();}
-	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction();}
+arguments: arguments COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction(); }
+	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction(); }
 	;
 
 expression: expression[left] ADD expression[right]								{ $$ = AdditionExpressionGrammarAction($left, $right); }

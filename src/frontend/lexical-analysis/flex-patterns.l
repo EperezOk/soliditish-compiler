@@ -23,6 +23,8 @@ character       [a-zA-Z]
 endline			[\n]
 whitespace		[ \f\n\r\t\v]
 address         0x[a-fA-F0-9]{40}
+boolean         (true|false)
+string          \"[^"]*\"
 
 %%
 
@@ -38,7 +40,14 @@ address         0x[a-fA-F0-9]{40}
 "contract"								    { return KeywordPatternAction(yytext, CONTRACT); }
 "function"								    { return KeywordPatternAction(yytext, FUNCTION); }
 
-"ERC20"                                     { return KeywordPatternAction(yytext, ERC20); }
+"ERC20"                                     { return KeywordPatternAction(yytext, T_ERC20); }
+"ERC721"                                    { return KeywordPatternAction(yytext, T_ERC721); }
+"bytes"                                     { return KeywordPatternAction(yytext, T_BYTES); }
+"string"                                    { return KeywordPatternAction(yytext, T_STRING); }
+"bool"                                   { return KeywordPatternAction(yytext, T_BOOLEAN); }
+"address"                                   { return KeywordPatternAction(yytext, T_ADDRESS); }
+"uint"                                      { return KeywordPatternAction(yytext, T_UINT); }
+"int"                                       { return KeywordPatternAction(yytext, T_INT); }
 
 "+"											{ return AdditionOperatorPatternAction(); }
 "-"											{ return SubtractionOperatorPatternAction(); }
@@ -49,13 +58,19 @@ address         0x[a-fA-F0-9]{40}
 "}"											{ return CloseCurlyBracketPatternAction(); }
 "("											{ return OpenParenthesisPatternAction(); }
 ")"											{ return CloseParenthesisPatternAction(); }
+"["											{ return OpenSquareBracketPatternAction(); }
+"]"											{ return CloseSquareBracketPatternAction(); }
 ","                                         { return CommaPatternAction(); }
 
-{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
+-?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
-({character}|_)({character}|_|{digit})*	    { return StringValuePatternAction(yytext, yyleng); }
+({character}|_)({character}|_|{digit})*	    { return StringValuePatternAction(yytext, yyleng, IDENTIFIER); }
 
-{address}                                   { return StringValuePatternAction(yytext, yyleng); }
+{address}                                   { return StringValuePatternAction(yytext, yyleng, ADDRESS); }
+
+{boolean}                                   { return StringValuePatternAction(yytext, yyleng, BOOLEAN); }
+
+{string}                                    { return StringValuePatternAction(yytext, yyleng, STRING); }
 
 "="                                         { return KeywordPatternAction(yytext, EQ); }
 

@@ -1,0 +1,3 @@
+contract myContract {
+    ERC20[ tokens;
+}
