@@ -36,6 +36,7 @@ address         0x[a-fA-F0-9]{40}
 <LINE_COMMENT>\n							{ EndCommentPatternAction(); BEGIN(INITIAL); }
 
 "contract"								    { return KeywordPatternAction(yytext, CONTRACT); }
+"function"								    { return KeywordPatternAction(yytext, FUNCTION); }
 
 "ERC20"                                     { return KeywordPatternAction(yytext, ERC20); }
 
@@ -48,6 +49,7 @@ address         0x[a-fA-F0-9]{40}
 "}"											{ return CloseCurlyBracketPatternAction(); }
 "("											{ return OpenParenthesisPatternAction(); }
 ")"											{ return CloseParenthesisPatternAction(); }
+","                                         { return CommaPatternAction(); }
 
 {digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 

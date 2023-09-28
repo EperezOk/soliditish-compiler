@@ -1,0 +1,10 @@
+contract myContract {
+    // Las funciones son no-reentrantes y privadas por defecto
+    function myFunction(ERC20 myToken, ERC20 myOtherToken) {
+        ERC20 token = myToken;
+    }
+
+    function noArgumentFunction() {
+        
+    }
+}

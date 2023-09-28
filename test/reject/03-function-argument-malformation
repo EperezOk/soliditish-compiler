@@ -1,0 +1,5 @@
+contract myContract {
+    // Las funciones son no-reentrantes y privadas por defecto
+    function myFunction(ERC20 myToken,) {
+    }
+}

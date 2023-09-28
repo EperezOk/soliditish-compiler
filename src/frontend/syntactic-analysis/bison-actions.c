@@ -65,8 +65,8 @@ int InstructionsGrammarAction(const int instructions, const int instruction) {
 	return 0;
 }
 
-int ERC20DefinitionGrammarAction(const char *identifier, const char *initialization) {
-	LogDebug("[Bison] ERC20DefinitionGrammarAction(%s, %s)", identifier, initialization);
+int ERC20DefinitionGrammarAction() {
+	LogDebug("[Bison] ERC20DefinitionGrammarAction()");
 	return 0;
 }
 
@@ -75,8 +75,33 @@ int EmptyInstructionGrammarAction() {
 	return 0;
 }
 
-int VariableDefinitionGrammarAction() {
-	LogDebug("[Bison] VariableDefinitionGrammarAction");
+int VariableDefinitionGrammarAction(const int dataType, const char *name, const char *value) {
+	LogDebug("[Bison] VariableDefinitionGrammarAction(%d, %s, %s)", dataType, name, value);
+	return 0;
+}
+
+int FunctionInstructionGrammarAction() {
+	LogDebug("[Bison] FunctionInstructionGrammarAction");
+	return 0;
+}
+
+int FunctionDefinitionGrammarAction(char *functionName) {
+	LogDebug("[Bison] FunctionDefinitionGrammarAction(%s)", functionName);
+	return 0;
+}
+
+int EmptyArgumentListGrammarAction() {
+	LogDebug("[Bison] EmptyArgumentListGrammarAction");
+	return 0;
+}
+
+int ArgumentListGrammarAction() {
+	LogDebug("[Bison] ArgumentListGrammarAction");
+	return 0;
+}
+
+int ArgumentDefinitionGrammarAction() {
+	LogDebug("[Bison] ArgumentDefinitionGrammarAction");
 	return 0;
 }
 

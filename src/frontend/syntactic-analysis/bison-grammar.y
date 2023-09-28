@@ -18,10 +18,16 @@
 	// No-terminales (frontend).
 	int program;
 	int contract_definition;
-	int block;
-	int instructions;
-	int instruction;
-	int variable_definition;
+	int contract_block;
+	int function_block;
+	int contract_instructions;
+	int function_instructions;
+	int contract_instruction;
+	int function_instruction;
+	int arguments;
+	int data_type;
+	int argument_definition;
+	int function_definition;
 	int expression;
 	int factor;
 	int constant;
@@ -38,6 +44,7 @@
 
 // Keywords
 %token <token> CONTRACT
+%token <token> FUNCTION
 %token <token> ERC20
 %token <token> EOL
 %token <token> EQ
@@ -52,6 +59,7 @@
 %token <token> CLOSE_CURLY_BRACKET
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
+%token <token> COMMA
 
 // Tipos de dato
 %token <string> IDENTIFIER
@@ -61,10 +69,16 @@
 // Tipos de dato para los no-terminales generados desde Bison.
 %type <program> program
 %type <contract_definition> contract_definition
-%type <block> block
-%type <instructions> instructions
-%type <instruction> instruction
-%type <variable_definition> variable_definition
+%type <contract_block> contract_block
+%type <function_block> function_block
+%type <contract_instructions> contract_instructions
+%type <function_instructions> function_instructions
+%type <contract_instruction> contract_instruction
+%type <function_instruction> function_instruction
+%type <arguments> arguments
+%type <data_type> data_type
+%type <function_definition> function_definition
+%type <argument_definition> argument_definition
 %type <initialization> initialization
 %type <expression> expression
 %type <factor> factor
@@ -79,42 +93,64 @@
 
 %%
 
-program: contract_definition										{ $$ = ProgramGrammarAction($1); }
+program: contract_definition													{ $$ = ProgramGrammarAction($1); }
 	;
 
-contract_definition: CONTRACT IDENTIFIER block						{ $$ = ContractDefinitionGrammarAction($2); }
+contract_definition: CONTRACT IDENTIFIER contract_block							{ $$ = ContractDefinitionGrammarAction($2); }
 	;
 
-block: OPEN_CURLY_BRACKET instructions CLOSE_CURLY_BRACKET			{ $$ = BlockGrammarAction($2); }
+contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ $$ = BlockGrammarAction($2);}
 	;
 
-instructions: instructions instruction								{ $$ = InstructionsGrammarAction($1, $2); }
-	|																{ $$ = EmptyInstructionGrammarAction(); }
+function_block: OPEN_CURLY_BRACKET function_instructions CLOSE_CURLY_BRACKET	{ $$ = BlockGrammarAction($2); }
 	;
 
-instruction: variable_definition EOL								{ $$ = VariableDefinitionGrammarAction(); }		
+contract_instructions: contract_instructions contract_instruction				{ $$ = InstructionsGrammarAction($1, $2); } 
+	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-variable_definition: ERC20 IDENTIFIER initialization				{ $$ = ERC20DefinitionGrammarAction($2, $3); }
+contract_instruction: data_type IDENTIFIER initialization EOL					{ $$ = VariableDefinitionGrammarAction($1, $2, $3); }
+	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
 	;
 
-initialization: EQ IDENTIFIER										{ $$ = InitializationGrammarAction($2); }
-	| EQ ADDRESS													{ $$ = InitializationGrammarAction($2);}
-	|																{ $$ = EmptyInitializationGrammarAction();}
+function_instructions: function_instructions function_instruction				{ $$ = InstructionsGrammarAction($1, $2); }
+	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-expression: expression[left] ADD expression[right]					{ $$ = AdditionExpressionGrammarAction($left, $right); }
-	| expression[left] SUB expression[right]						{ $$ = SubtractionExpressionGrammarAction($left, $right); }
-	| expression[left] MUL expression[right]						{ $$ = MultiplicationExpressionGrammarAction($left, $right); }
-	| expression[left] DIV expression[right]						{ $$ = DivisionExpressionGrammarAction($left, $right); }
-	| factor														{ $$ = FactorExpressionGrammarAction($1); }
+function_instruction: data_type IDENTIFIER initialization EOL					{ $$ = VariableDefinitionGrammarAction($1, $2, $3); }
 	;
 
-factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS				{ $$ = ExpressionFactorGrammarAction($2); }
-	| constant														{ $$ = ConstantFactorGrammarAction($1); }
+data_type: ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	;
 
-constant: INTEGER													{ $$ = IntegerConstantGrammarAction($1); }
+initialization: EQ IDENTIFIER													{ $$ = InitializationGrammarAction($2); }
+	| EQ ADDRESS																{ $$ = InitializationGrammarAction($2);}
+	|																			{ $$ = EmptyInitializationGrammarAction();}
+	;
+
+function_definition: FUNCTION IDENTIFIER argument_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2);}
+	;
+
+argument_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction();}
+	| OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction();}
+	;
+
+arguments: arguments COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction();}
+	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction();}
+	;
+
+expression: expression[left] ADD expression[right]								{ $$ = AdditionExpressionGrammarAction($left, $right); }
+	| expression[left] SUB expression[right]									{ $$ = SubtractionExpressionGrammarAction($left, $right); }
+	| expression[left] MUL expression[right]									{ $$ = MultiplicationExpressionGrammarAction($left, $right); }
+	| expression[left] DIV expression[right]									{ $$ = DivisionExpressionGrammarAction($left, $right); }
+	| factor																	{ $$ = FactorExpressionGrammarAction($1); }
+	;
+
+factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFactorGrammarAction($2); }
+	| constant																	{ $$ = ConstantFactorGrammarAction($1); }
+	;
+
+constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
 	;
 
 %%

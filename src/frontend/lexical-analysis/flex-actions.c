@@ -75,6 +75,12 @@ token CloseParenthesisPatternAction() {
 	return CLOSE_PARENTHESIS;
 }
 
+token CommaPatternAction() {
+	LogDebug("[Flex] CommaPatternAction: ','.");
+	yylval.token = COMMA;
+	return COMMA;
+}
+
 token DivisionOperatorPatternAction() {
 	LogDebug("[Flex] DivisionOperatorPatternAction: '/'.");
 	yylval.token = DIV;

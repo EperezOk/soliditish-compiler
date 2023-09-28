@@ -31,6 +31,7 @@ token OpenCurlyBracketPatternAction();
 token CloseCurlyBracketPatternAction();
 token OpenParenthesisPatternAction();
 token CloseParenthesisPatternAction();
+token CommaPatternAction();
 
 token AdditionOperatorPatternAction();
 token DivisionOperatorPatternAction();

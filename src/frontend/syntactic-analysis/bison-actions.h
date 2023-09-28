@@ -18,10 +18,16 @@ int ProgramGrammarAction(const int value);
 int ContractDefinitionGrammarAction(const char *contractName);
 int BlockGrammarAction(const int value);
 int InstructionsGrammarAction(const int instructions, const int instruction);
-int VariableDefinitionGrammarAction();
+int VariableDefinitionGrammarAction(const int dataType, const char *name, const char *value);
+int FunctionInstructionGrammarAction();
+int FunctionDefinitionGrammarAction(char *functionName);
+
+int EmptyArgumentListGrammarAction();
+int ArgumentListGrammarAction();
+int ArgumentDefinitionGrammarAction();
 
 // Instruction
-int ERC20DefinitionGrammarAction(const char *identifier, const char *initialization);
+int ERC20DefinitionGrammarAction();
 int EmptyInstructionGrammarAction();
 const char *InitializationGrammarAction(const char *identifier);
 const char *EmptyInitializationGrammarAction();
