@@ -26,6 +26,7 @@
 	int contract_instruction;
 	int function_instruction;
 	int function_call;
+	int member_call;
 	int arguments;
 	int variable_definition;
 	int parameters;
@@ -84,6 +85,7 @@
 %token <token> EOL
 %token <token> EQ
 %token <token> COMMA
+%token <token> DOT
 
 // Tipos de dato
 %token <token> T_ERC20
@@ -111,6 +113,7 @@
 %type <contract_instructions> contract_instructions
 %type <function_instructions> function_instructions
 %type <function_call> function_call
+%type <member_call> member_call
 %type <arguments> arguments
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
@@ -169,6 +172,7 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 function_instruction: variable_definition EOL									{ $$ = 0; }
 	| conditional																{ $$ = 0; }
 	| function_call EOL															{ $$ = 0; }
+	| member_call EOL															{ $$ = 0; }
 	;
 
 function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = 0; }
@@ -179,9 +183,12 @@ arguments: arguments COMMA expression											{ $$ = 0; }
 	| expression																{ $$ = 0; }
 	;
 
+member_call: IDENTIFIER DOT function_call										{ $$ = 0; }
+	;
+
 variable_definition: data_type IDENTIFIER										{ $$ = 0; }
 	| data_type IDENTIFIER EQ expression										{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
-	/* | data_type IDENTIFIER EQ `new uint[](numerical_expression)`				{ $$ = 0; } */
+	/* TODO: inicializacion de arrays */
 	| data_type IDENTIFIER EQ function_call										{ $$ = 0; }
 	;
 

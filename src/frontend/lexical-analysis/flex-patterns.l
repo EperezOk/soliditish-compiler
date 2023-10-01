@@ -77,6 +77,7 @@ string          \"[^"]*\"
 "["											{ return TokenPatternAction(yytext, OPEN_SQUARE_BRACKET); }
 "]"											{ return TokenPatternAction(yytext, CLOSE_SQUARE_BRACKET); }
 ","                                         { return TokenPatternAction(yytext, COMMA); }
+"."                                         { return TokenPatternAction(yytext, DOT); }
 
 -?{digit}*\.?{digit}+[eE]-?{digit}+         { return StringValuePatternAction(yytext, yyleng, SCIENTIFIC_NOTATION); }
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
