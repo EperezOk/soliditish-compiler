@@ -1,0 +1,10 @@
+contract TokenMinter {
+
+    event NewOwner(address newOwner);
+
+    function test() {
+        address bob = 0x1A55efc396529724f499748Ecb812405c3035c8D;
+        
+        emit NewOwner(bob);
+    }
+}

@@ -49,6 +49,8 @@
 // Keywords
 %token <token> CONTRACT
 %token <token> FUNCTION
+%token <token> EVENT
+%token <token> EMIT
 
 // IDs y tipos de los tokens terminales generados desde Flex.
 %token <string> IDENTIFIER
@@ -163,6 +165,7 @@ contract_instructions: contract_instructions contract_instruction				{ $$ = Inst
 
 contract_instruction: variable_definition EOL									{ $$ = 0; }
 	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
+	| EVENT IDENTIFIER parameter_definition EOL									{ $$ = 0; }
 	;
 
 function_instructions: function_instructions function_instruction				{ $$ = InstructionsGrammarAction($1, $2); }
@@ -173,6 +176,7 @@ function_instruction: variable_definition EOL									{ $$ = 0; }
 	| conditional																{ $$ = 0; }
 	| function_call EOL															{ $$ = 0; }
 	| member_call EOL															{ $$ = 0; }
+	| EMIT IDENTIFIER arguments EOL												{ $$ = 0; }
 	;
 
 function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = 0; }

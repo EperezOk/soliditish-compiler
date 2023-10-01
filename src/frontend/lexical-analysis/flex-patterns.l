@@ -40,6 +40,9 @@ string          \"[^"]*\"
 "contract"								    { return TokenPatternAction(yytext, CONTRACT); }
 "function"								    { return TokenPatternAction(yytext, FUNCTION); }
 
+"event"                                     { return TokenPatternAction(yytext, EVENT); }
+"emit"                                      { return TokenPatternAction(yytext, EMIT); }
+
 "if"                                        { return TokenPatternAction(yytext, IF); }
 "else"                                      { return TokenPatternAction(yytext, ELSE); }
 
