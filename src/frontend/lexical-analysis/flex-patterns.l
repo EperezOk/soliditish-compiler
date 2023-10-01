@@ -53,6 +53,19 @@ string          \"[^"]*\"
 "-"											{ return TokenPatternAction(yytext, SUB); }
 "*"											{ return TokenPatternAction(yytext, MUL); }
 "/"											{ return TokenPatternAction(yytext, DIV); }
+"%"											{ return TokenPatternAction(yytext, MOD); }
+"**"										{ return TokenPatternAction(yytext, EXP); }
+
+"=="										{ return TokenPatternAction(yytext, IS_EQ); }
+"!="										{ return TokenPatternAction(yytext, NEQ); }
+"<"											{ return TokenPatternAction(yytext, LT); }
+"<="										{ return TokenPatternAction(yytext, LTE); }
+">"											{ return TokenPatternAction(yytext, GT); }
+">="										{ return TokenPatternAction(yytext, GTE); }
+
+"&&"										{ return TokenPatternAction(yytext, AND); }
+"||"										{ return TokenPatternAction(yytext, OR); }
+"!"											{ return TokenPatternAction(yytext, NOT); }
 
 "{"											{ return TokenPatternAction(yytext, OPEN_CURLY_BRACKET); }
 "}"											{ return TokenPatternAction(yytext, CLOSE_CURLY_BRACKET); }
@@ -64,11 +77,11 @@ string          \"[^"]*\"
 
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
+{boolean}                                   { return StringValuePatternAction(yytext, yyleng, BOOLEAN); }
+
 ({character}|_)({character}|_|{digit})*	    { return StringValuePatternAction(yytext, yyleng, IDENTIFIER); }
 
 {address}                                   { return StringValuePatternAction(yytext, yyleng, ADDRESS); }
-
-{boolean}                                   { return StringValuePatternAction(yytext, yyleng, BOOLEAN); }
 
 {string}                                    { return StringValuePatternAction(yytext, yyleng, STRING); }
 

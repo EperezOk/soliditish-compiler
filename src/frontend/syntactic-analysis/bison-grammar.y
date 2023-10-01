@@ -24,6 +24,7 @@
 	int function_instructions;
 	int contract_instruction;
 	int function_instruction;
+	int variable_definition;
 	int arguments;
 	int data_type;
 	int argument_definition;
@@ -51,6 +52,21 @@
 %token <token> SUB
 %token <token> MUL
 %token <token> DIV
+%token <token> MOD
+%token <token> EXP
+
+// Comparadores
+%token <token> IS_EQ
+%token <token> NEQ
+%token <token> LT
+%token <token> LTE
+%token <token> GT
+%token <token> GTE
+
+// Operadores logicos
+%token <token> AND
+%token <token> OR
+%token <token> NOT
 
 %token <token> OPEN_CURLY_BRACKET
 %token <token> CLOSE_CURLY_BRACKET
@@ -87,6 +103,7 @@
 %type <function_instructions> function_instructions
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
+%type <variable_definition> variable_definition
 %type <arguments> arguments
 %type <data_type> data_type
 %type <function_definition> function_definition
@@ -96,8 +113,13 @@
 %type <constant> constant
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
-%left ADD SUB
+%left IS_EQ NEQ LT LTE GT GTE
+%left AND OR
+%right NOT
+%left ADD SUB // menor precedencia
 %left MUL DIV
+%left MOD
+%right EXP	  // mayor precedencia
 
 // El símbolo inicial de la gramatica.
 %start program
@@ -120,8 +142,7 @@ contract_instructions: contract_instructions contract_instruction				{ $$ = Inst
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-contract_instruction: data_type IDENTIFIER EOL									{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
-	| data_type IDENTIFIER EQ constant EOL										{ $$ = 0; }
+contract_instruction: variable_definition EOL									{ $$ = 0; }
 	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
 	;
 
@@ -129,7 +150,11 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-function_instruction: data_type IDENTIFIER EQ constant EOL						{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
+function_instruction: variable_definition EOL									{ $$ = 0; }
+	;
+
+variable_definition: data_type IDENTIFIER										{ $$ = 0; }
+	| data_type IDENTIFIER EQ expression										{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
 	;
 
 data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
@@ -159,6 +184,17 @@ expression: expression[left] ADD expression[right]								{ $$ = AdditionExpress
 	| expression[left] SUB expression[right]									{ $$ = SubtractionExpressionGrammarAction($left, $right); }
 	| expression[left] MUL expression[right]									{ $$ = MultiplicationExpressionGrammarAction($left, $right); }
 	| expression[left] DIV expression[right]									{ $$ = DivisionExpressionGrammarAction($left, $right); }
+	| expression[left] MOD expression[right]									{ $$ = ModuloExpressionGrammarAction($left, $right); }
+	| expression[left] EXP expression[right]									{ $$ = ExponentiationExpressionGrammarAction($left, $right); }
+	| expression[left] IS_EQ expression[right]									{ $$ = EqualityExpressionGrammarAction($left, $right); }
+	| expression[left] NEQ expression[right]									{ $$ = InequalityExpressionGrammarAction($left, $right); }
+	| expression[left] LT expression[right]										{ $$ = LessThanExpressionGrammarAction($left, $right); }
+	| expression[left] LTE expression[right]									{ $$ = LessThanOrEqualExpressionGrammarAction($left, $right); }
+	| expression[left] GT expression[right]										{ $$ = GreaterThanExpressionGrammarAction($left, $right); }
+	| expression[left] GTE expression[right]									{ $$ = GreaterThanOrEqualExpressionGrammarAction($left, $right); }
+	| expression[left] AND expression[right]									{ $$ = AndExpressionGrammarAction($left, $right); }
+	| expression[left] OR expression[right]										{ $$ = OrExpressionGrammarAction($left, $right); }
+	| NOT expression															{ $$ = NotExpressionGrammarAction($2); }
 	| factor																	{ $$ = FactorExpressionGrammarAction($1); }
 	;
 

@@ -125,6 +125,60 @@ int DivisionExpressionGrammarAction(const int leftValue, const int rightValue) {
 	return Divide(leftValue, rightValue);
 }
 
+int ModuloExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] ModuloExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int ExponentiationExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] ExponentiationExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int EqualityExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] EqualityExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+int InequalityExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] InequalityExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int LessThanExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] LessThanExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int LessThanOrEqualExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] LessThanOrEqualExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int GreaterThanExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] GreaterThanExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int GreaterThanOrEqualExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] GreaterThanOrEqualExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int AndExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] AndExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int OrExpressionGrammarAction(const int leftValue, const int rightValue) {
+	LogDebug("[Bison] OrExpressionGrammarAction(%d, %d)", leftValue, rightValue);
+	return 0;
+}
+
+int NotExpressionGrammarAction(const int value) {
+	LogDebug("[Bison] NotExpressionGrammarAction(%d)", value);
+	return 0;
+}
+
 int FactorExpressionGrammarAction(const int value) {
 	LogDebug("[Bison] FactorExpressionGrammarAction(%d)", value);
 	return value;
