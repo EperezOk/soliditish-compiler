@@ -25,10 +25,12 @@
 	int function_instructions;
 	int contract_instruction;
 	int function_instruction;
-	int variable_definition;
+	int function_call;
 	int arguments;
+	int variable_definition;
+	int parameters;
 	int data_type;
-	int argument_definition;
+	int parameter_definition;
 	int function_definition;
 	int expression;
 	int factor;
@@ -108,13 +110,15 @@
 %type <conditional> conditional
 %type <contract_instructions> contract_instructions
 %type <function_instructions> function_instructions
+%type <function_call> function_call
+%type <arguments> arguments
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
 %type <variable_definition> variable_definition
-%type <arguments> arguments
+%type <parameters> parameters
 %type <data_type> data_type
 %type <function_definition> function_definition
-%type <argument_definition> argument_definition
+%type <parameter_definition> parameter_definition
 %type <expression> expression
 %type <factor> factor
 %type <constant> constant
@@ -164,10 +168,21 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 
 function_instruction: variable_definition EOL									{ $$ = 0; }
 	| conditional																{ $$ = 0; }
+	| function_call EOL															{ $$ = 0; }
+	;
+
+function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = 0; }
+	| IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS					{ $$ = 0; }
+	;
+
+arguments: arguments COMMA expression											{ $$ = 0; }
+	| expression																{ $$ = 0; }
 	;
 
 variable_definition: data_type IDENTIFIER										{ $$ = 0; }
 	| data_type IDENTIFIER EQ expression										{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
+	/* | data_type IDENTIFIER EQ `new uint[](numerical_expression)`				{ $$ = 0; } */
+	| data_type IDENTIFIER EQ function_call										{ $$ = 0; }
 	;
 
 data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
@@ -182,14 +197,14 @@ data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
 
-function_definition: FUNCTION IDENTIFIER argument_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2); }
+function_definition: FUNCTION IDENTIFIER parameter_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2); }
 	;
 
-argument_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction(); }
-	| OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction(); }
+parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction(); }
+	| OPEN_PARENTHESIS parameters CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction(); }
 	;
 
-arguments: arguments COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction(); }
+parameters: parameters COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction(); }
 	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction(); }
 	;
 

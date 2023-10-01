@@ -1,0 +1,3 @@
+contract TokenMinter {
+    int a = myFunc(1,);
+}
