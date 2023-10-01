@@ -35,32 +35,32 @@ string          \"[^"]*\"
 
 "//"										{ BEGIN(LINE_COMMENT); BeginCommentPatternAction(); }
 <LINE_COMMENT>.							    { IgnoredPatternAction(yytext, yyleng); }
-<LINE_COMMENT>\n							{ EndCommentPatternAction(); BEGIN(INITIAL); }
+<LINE_COMMENT>{endline}					    { EndCommentPatternAction(); BEGIN(INITIAL); }
 
-"contract"								    { return KeywordPatternAction(yytext, CONTRACT); }
-"function"								    { return KeywordPatternAction(yytext, FUNCTION); }
+"contract"								    { return TokenPatternAction(yytext, CONTRACT); }
+"function"								    { return TokenPatternAction(yytext, FUNCTION); }
 
-"ERC20"                                     { return KeywordPatternAction(yytext, T_ERC20); }
-"ERC721"                                    { return KeywordPatternAction(yytext, T_ERC721); }
-"bytes"                                     { return KeywordPatternAction(yytext, T_BYTES); }
-"string"                                    { return KeywordPatternAction(yytext, T_STRING); }
-"bool"                                   { return KeywordPatternAction(yytext, T_BOOLEAN); }
-"address"                                   { return KeywordPatternAction(yytext, T_ADDRESS); }
-"uint"                                      { return KeywordPatternAction(yytext, T_UINT); }
-"int"                                       { return KeywordPatternAction(yytext, T_INT); }
+"ERC20"                                     { return TokenPatternAction(yytext, T_ERC20); }
+"ERC721"                                    { return TokenPatternAction(yytext, T_ERC721); }
+"bytes"                                     { return TokenPatternAction(yytext, T_BYTES); }
+"string"                                    { return TokenPatternAction(yytext, T_STRING); }
+"bool"                                      { return TokenPatternAction(yytext, T_BOOLEAN); }
+"address"                                   { return TokenPatternAction(yytext, T_ADDRESS); }
+"uint"                                      { return TokenPatternAction(yytext, T_UINT); }
+"int"                                       { return TokenPatternAction(yytext, T_INT); }
 
-"+"											{ return AdditionOperatorPatternAction(); }
-"-"											{ return SubtractionOperatorPatternAction(); }
-"*"											{ return MultiplicationOperatorPatternAction(); }
-"/"											{ return DivisionOperatorPatternAction(); }
+"+"											{ return TokenPatternAction(yytext, ADD); }
+"-"											{ return TokenPatternAction(yytext, SUB); }
+"*"											{ return TokenPatternAction(yytext, MUL); }
+"/"											{ return TokenPatternAction(yytext, DIV); }
 
-"{"											{ return OpenCurlyBracketPatternAction(); }
-"}"											{ return CloseCurlyBracketPatternAction(); }
-"("											{ return OpenParenthesisPatternAction(); }
-")"											{ return CloseParenthesisPatternAction(); }
-"["											{ return OpenSquareBracketPatternAction(); }
-"]"											{ return CloseSquareBracketPatternAction(); }
-","                                         { return CommaPatternAction(); }
+"{"											{ return TokenPatternAction(yytext, OPEN_CURLY_BRACKET); }
+"}"											{ return TokenPatternAction(yytext, CLOSE_CURLY_BRACKET); }
+"("											{ return TokenPatternAction(yytext, OPEN_PARENTHESIS); }
+")"											{ return TokenPatternAction(yytext, CLOSE_PARENTHESIS); }
+"["											{ return TokenPatternAction(yytext, OPEN_SQUARE_BRACKET); }
+"]"											{ return TokenPatternAction(yytext, CLOSE_SQUARE_BRACKET); }
+","                                         { return TokenPatternAction(yytext, COMMA); }
 
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
@@ -72,9 +72,9 @@ string          \"[^"]*\"
 
 {string}                                    { return StringValuePatternAction(yytext, yyleng, STRING); }
 
-"="                                         { return KeywordPatternAction(yytext, EQ); }
+"="                                         { return TokenPatternAction(yytext, EQ); }
 
-";"                                         { return KeywordPatternAction(yytext, EOL); }
+";"                                         { return TokenPatternAction(yytext, EOL); }
 
 {whitespace}+								{ IgnoredPatternAction(yytext, yyleng); }
 

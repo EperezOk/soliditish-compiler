@@ -105,16 +105,6 @@ int ArgumentDefinitionGrammarAction() {
 	return 0;
 }
 
-const char *InitializationGrammarAction(const char *identifier) {
-	LogDebug("[Bison] InitializationGrammarAction(%s)", identifier);
-	return identifier;
-}
-
-const char *EmptyInitializationGrammarAction() {
-	LogDebug("[Bison] EmptyInitializationGrammarAction");
-	return 0;
-}
-
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue) {
 	LogDebug("[Bison] AdditionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
 	return Add(leftValue, rightValue);

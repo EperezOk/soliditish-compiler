@@ -31,7 +31,6 @@
 	int expression;
 	int factor;
 	int constant;
-	const char *initialization;
 
 	// Terminales.
 	token token;
@@ -92,7 +91,6 @@
 %type <data_type> data_type
 %type <function_definition> function_definition
 %type <argument_definition> argument_definition
-%type <initialization> initialization
 %type <expression> expression
 %type <factor> factor
 %type <constant> constant
@@ -122,7 +120,8 @@ contract_instructions: contract_instructions contract_instruction				{ $$ = Inst
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-contract_instruction: data_type IDENTIFIER initialization EOL					{ $$ = VariableDefinitionGrammarAction($1, $2, $3); }
+contract_instruction: data_type IDENTIFIER EOL									{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
+	| data_type IDENTIFIER EQ constant EOL										{ $$ = 0; }
 	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
 	;
 
@@ -130,7 +129,7 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-function_instruction: data_type IDENTIFIER initialization EOL					{ $$ = VariableDefinitionGrammarAction($1, $2, $3); }
+function_instruction: data_type IDENTIFIER EQ constant EOL						{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
 	;
 
 data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
@@ -144,15 +143,6 @@ data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = 0; }
 	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
-
-initialization: EQ IDENTIFIER													{ $$ = InitializationGrammarAction($2); }
-	| EQ ADDRESS																{ $$ = InitializationGrammarAction($2); }
-	| EQ INTEGER																{ $$ = 0; }
-	| EQ BOOLEAN																{ $$ = 0; }
-	| EQ STRING																	{ $$ = 0; }
-	|																			{ $$ = EmptyInitializationGrammarAction(); }
-	;
-
 
 function_definition: FUNCTION IDENTIFIER argument_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2); }
 	;
@@ -177,6 +167,10 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFac
 	;
 
 constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
+	| IDENTIFIER																{ $$ = 0; }
+	| ADDRESS																	{ $$ = 0; }
+	| BOOLEAN																	{ $$ = 0; }
+	| STRING																	{ $$ = 0; }
 	;
 
 %%

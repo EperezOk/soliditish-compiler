@@ -29,9 +29,6 @@ int ArgumentDefinitionGrammarAction();
 // Instruction
 int ERC20DefinitionGrammarAction();
 int EmptyInstructionGrammarAction();
-const char *InitializationGrammarAction(const char *identifier);
-const char *EmptyInitializationGrammarAction();
-
 
 int AdditionExpressionGrammarAction(const int leftValue, const int rightValue);
 int SubtractionExpressionGrammarAction(const int leftValue, const int rightValue);
