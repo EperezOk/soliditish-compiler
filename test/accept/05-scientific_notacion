@@ -1,0 +1,3 @@
+contract TokenMinter {
+   int n = -5e1;
+}

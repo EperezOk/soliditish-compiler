@@ -78,6 +78,7 @@ string          \"[^"]*\"
 "]"											{ return TokenPatternAction(yytext, CLOSE_SQUARE_BRACKET); }
 ","                                         { return TokenPatternAction(yytext, COMMA); }
 
+-?{digit}*\.?{digit}+[eE]{digit}+           { return ScientificPatternAction(yytext, yyleng);}
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
 {boolean}                                   { return StringValuePatternAction(yytext, yyleng, BOOLEAN); }
