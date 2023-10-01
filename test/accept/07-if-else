@@ -1,0 +1,15 @@
+contract myContract {
+
+    function test() {
+        if (true || false) {
+            uint a = 1 + 3;
+        } else {
+            uint a = 1 + 2;
+        }
+
+        if (true && false) {
+            uint a = 1 + 5;
+        }
+    }
+
+}

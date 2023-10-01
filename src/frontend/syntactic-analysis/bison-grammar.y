@@ -20,6 +20,7 @@
 	int contract_definition;
 	int contract_block;
 	int function_block;
+	int conditional;
 	int contract_instructions;
 	int function_instructions;
 	int contract_instruction;
@@ -68,6 +69,10 @@
 %token <token> OR
 %token <token> NOT
 
+// Control de flujo
+%token <token> IF
+%token <token> ELSE
+
 %token <token> OPEN_CURLY_BRACKET
 %token <token> CLOSE_CURLY_BRACKET
 %token <token> OPEN_PARENTHESIS
@@ -99,6 +104,7 @@
 %type <contract_definition> contract_definition
 %type <contract_block> contract_block
 %type <function_block> function_block
+%type <conditional> conditional
 %type <contract_instructions> contract_instructions
 %type <function_instructions> function_instructions
 %type <contract_instruction> contract_instruction
@@ -138,6 +144,11 @@ contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ 
 function_block: OPEN_CURLY_BRACKET function_instructions CLOSE_CURLY_BRACKET	{ $$ = BlockGrammarAction($2); }
 	;
 
+conditional: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block	{ $$ = 0; }
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block
+		ELSE function_block														{ $$ = 0; }
+	;
+
 contract_instructions: contract_instructions contract_instruction				{ $$ = InstructionsGrammarAction($1, $2); } 
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
@@ -151,6 +162,7 @@ function_instructions: function_instructions function_instruction				{ $$ = Inst
 	;
 
 function_instruction: variable_definition EOL									{ $$ = 0; }
+	| conditional																{ $$ = 0; }
 	;
 
 variable_definition: data_type IDENTIFIER										{ $$ = 0; }

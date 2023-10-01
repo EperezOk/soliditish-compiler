@@ -1,0 +1,9 @@
+contract myContract {
+
+    function test() {
+        else {
+            uint a = 1 + 2;
+        }
+    }
+
+}
