@@ -20,39 +20,33 @@
  * (mediante $1, $2, $3, etc.).
  */
 
-char *copyLexeme(const char *lexeme, const int length)
-{
+char *copyLexeme(const char *lexeme, const int length) {
 	char *lexemeCopy = (char *)calloc(length + 1, sizeof(char));
 	strncpy(lexemeCopy, lexeme, length);
 	return lexemeCopy;
 }
 
-void BeginCommentPatternAction()
-{
+void BeginCommentPatternAction() {
 	LogDebug("[Flex] [COMMENT] BeginCommentPatternAction............................");
 }
 
-void EndCommentPatternAction()
-{
+void EndCommentPatternAction() {
 	LogDebug("[Flex] [COMMENT] EndCommentPatternAction..............................");
 }
 
-token TokenPatternAction(const char *lexeme, token token)
-{
+token TokenPatternAction(const char *lexeme, token token) {
 	LogDebug("[Flex] TokenPatternAction: '%s'", lexeme);
 	yylval.token = token;
 	return token;
 }
 
-token StringValuePatternAction(const char *lexeme, const int length, token token)
-{
+token StringValuePatternAction(const char *lexeme, const int length, token token) {
 	LogDebug("[Flex] StringValuePatternAction: '%s' (length = %d).", lexeme, length);
 	yylval.string = strndup(lexeme, length);
 	return token;
 }
 
-token IntegerPatternAction(const char *lexeme, const int length)
-{
+token IntegerPatternAction(const char *lexeme, const int length) {
 	LogDebug("[Flex] IntegerPatternAction: '%s' (length = %d).", lexeme, length);
 	char *lexemeCopy = copyLexeme(lexeme, length);
 	yylval.integer = atoi(lexemeCopy);
@@ -60,23 +54,7 @@ token IntegerPatternAction(const char *lexeme, const int length)
 	return INTEGER;
 }
 
-// TODO: avoid overflow when it is a big number
-token ScientificPatternAction(const char *lexeme, const int length)
-{
-	LogDebug("[Flex] ScientificPatternAction: '%s' (length = %d).", lexeme, length);
-	char *lexemeCopy = copyLexeme(lexeme, length);
-
-	double doubleValue = strtod(lexemeCopy, NULL);
-
-	int integerValue = (int)doubleValue;
-	yylval.integer = integerValue;
-
-	free(lexemeCopy);
-	return INTEGER;
-}
-
-token UnknownPatternAction(const char *lexeme, const int length)
-{
+token UnknownPatternAction(const char *lexeme, const int length) {
 	char *lexemeCopy = copyLexeme(lexeme, length);
 	LogDebug("[Flex] UnknownPatternAction: '%s' (length = %d).", lexemeCopy, length);
 	free(lexemeCopy);
@@ -85,8 +63,7 @@ token UnknownPatternAction(const char *lexeme, const int length)
 	return ERROR;
 }
 
-void IgnoredPatternAction(const char *lexeme, const int length)
-{
+void IgnoredPatternAction(const char *lexeme, const int length) {
 	char *lexemeCopy = copyLexeme(lexeme, length);
 	LogRaw("[DEBUG] [Flex] IgnoredPatternAction: '");
 	LogText(lexemeCopy, length);

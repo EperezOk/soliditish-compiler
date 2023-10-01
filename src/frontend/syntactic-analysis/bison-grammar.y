@@ -98,6 +98,7 @@
 %token <string> BOOLEAN
 %token <string> STRING
 %token <integer> INTEGER
+%token <string> SCIENTIFIC_NOTATION
 
 // Tipos de dato para los no-terminales generados desde Bison.
 %type <program> program
@@ -219,6 +220,7 @@ constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
 	| ADDRESS																	{ $$ = 0; }
 	| BOOLEAN																	{ $$ = 0; }
 	| STRING																	{ $$ = 0; }
+	| SCIENTIFIC_NOTATION														{ $$ = 0; }
 	;
 
 %%
