@@ -40,6 +40,7 @@
 	int parameters;
 	int data_type;
 	int parameter_definition;
+	int decorators;
 	int function_definition;
 	int expression;
 	int factor;
@@ -115,6 +116,8 @@
 %token <token> T_UINT
 %token <token> T_INT
 
+%token <string> DECORATOR
+
 // Constantes
 %token <string> ADDRESS
 %token <string> BOOLEAN
@@ -146,6 +149,7 @@
 %type <math_assignment_operator> math_assignment_operator
 %type <parameters> parameters
 %type <data_type> data_type
+%type <decorators> decorators
 %type <function_definition> function_definition
 %type <parameter_definition> parameter_definition
 %type <expression> expression
@@ -187,7 +191,7 @@ contract_instructions: contract_instructions contract_instruction				{ $$ = Inst
 	|																			{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-contract_instruction: variable_definition EOL									{ $$ = 0; }
+contract_instruction: decorators variable_definition EOL						{ $$ = 0; }
 	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
 	| EVENT IDENTIFIER parameter_definition EOL									{ $$ = 0; }
 	;
@@ -272,7 +276,12 @@ data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
 
-function_definition: FUNCTION IDENTIFIER parameter_definition function_block	{ $$ = FunctionDefinitionGrammarAction($2); }
+function_definition: decorators 
+		FUNCTION IDENTIFIER parameter_definition function_block					{ $$ = FunctionDefinitionGrammarAction($3); }
+	;
+
+decorators: DECORATOR decorators												{ $$ = 0; }
+	|																			{ $$ = 0; }
 	;
 
 parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS						{ $$ = EmptyArgumentListGrammarAction(); }

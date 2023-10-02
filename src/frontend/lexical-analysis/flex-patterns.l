@@ -91,6 +91,8 @@ string          \"[^"]*\"
 ","                                         { return TokenPatternAction(yytext, COMMA); }
 "."                                         { return TokenPatternAction(yytext, DOT); }
 
+@{character}+                               { return StringValuePatternAction(yytext, yyleng, DECORATOR); }
+
 -?{digit}*\.?{digit}+[eE]-?{digit}+         { return StringValuePatternAction(yytext, yyleng, SCIENTIFIC_NOTATION); }
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
