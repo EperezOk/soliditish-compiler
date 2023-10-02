@@ -29,6 +29,8 @@
 	int member_call;
 	int arguments;
 	int variable_definition;
+	int assignable;
+	int assignment;
 	int math_assignment;
 	int math_assignment_operator;
 	int parameters;
@@ -129,6 +131,8 @@
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
 %type <variable_definition> variable_definition
+%type <assignable> assignable
+%type <assignment> assignment
 %type <math_assignment> math_assignment
 %type <math_assignment_operator> math_assignment_operator
 %type <parameters> parameters
@@ -188,12 +192,21 @@ function_instruction: variable_definition EOL									{ $$ = 0; }
 	| function_call EOL															{ $$ = 0; }
 	| member_call EOL															{ $$ = 0; }
 	| EMIT IDENTIFIER arguments EOL												{ $$ = 0; }
+	| assignment EOL															{ $$ = 0; }
 	| math_assignment EOL														{ $$ = 0; } 
 	;
 
-math_assignment: IDENTIFIER math_assignment_operator expression					{ $$ = 0; }
-	| IDENTIFIER INC 															{ $$ = 0; }
-	| IDENTIFIER DEC															{ $$ = 0; }
+assignable: IDENTIFIER															{ $$ = 0; }
+	| IDENTIFIER OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
+
+assignment: assignable EQ expression											{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
+	| assignable EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET			{ $$ = 0; }
+	| assignable EQ function_call												{ $$ = 0; }
+	;
+
+math_assignment: assignable math_assignment_operator expression					{ $$ = 0; }
+	| assignable INC 															{ $$ = 0; }
+	| assignable DEC															{ $$ = 0; }
 	;
 
 math_assignment_operator: ADD_EQ												{ $$ = 0; }
@@ -211,13 +224,11 @@ arguments: arguments COMMA expression											{ $$ = 0; }
 	| expression																{ $$ = 0; }
 	;
 
-member_call: IDENTIFIER DOT function_call										{ $$ = 0; }
+member_call: assignable DOT function_call										{ $$ = 0; }
 	;
 
-variable_definition: data_type IDENTIFIER														{ $$ = 0; }
-	| data_type IDENTIFIER EQ expression														{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
-	| data_type IDENTIFIER EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET				{ $$ = 0; }
-	| data_type IDENTIFIER EQ function_call														{ $$ = 0; }
+variable_definition: data_type IDENTIFIER										{ $$ = 0; }
+	| data_type assignment														{ $$ = 0; }
 	;
 
 data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
@@ -266,6 +277,7 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFac
 	;
 
 constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
+	| IDENTIFIER OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	| IDENTIFIER																{ $$ = 0; }
 	| ADDRESS																	{ $$ = 0; }
 	| BOOLEAN																	{ $$ = 0; }

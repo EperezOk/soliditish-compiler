@@ -1,0 +1,14 @@
+contract TokenMinter {
+    function test() {
+        int k = 2;
+        int n = 1;
+        uint[] array = [1,2,3];
+
+        n = k;
+        n = 4;
+        array[0] = 5;
+        array[1] = n;
+        array[2] = array[1];
+        n = array[0];
+    }
+}
