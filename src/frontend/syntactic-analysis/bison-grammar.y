@@ -29,6 +29,10 @@
 	int member_call;
 	int arguments;
 	int variable_definition;
+	int loop;
+	int loop_initialization;
+	int loop_condition;
+	int loop_iteration;
 	int assignable;
 	int assignment;
 	int math_assignment;
@@ -88,6 +92,7 @@
 // Control de flujo
 %token <token> IF
 %token <token> ELSE
+%token <token> FOR
 
 %token <token> OPEN_CURLY_BRACKET
 %token <token> CLOSE_CURLY_BRACKET
@@ -131,6 +136,10 @@
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
 %type <variable_definition> variable_definition
+%type <loop> loop
+%type <loop_initialization> loop_initialization
+%type <loop_condition> loop_condition
+%type <loop_iteration> loop_iteration
 %type <assignable> assignable
 %type <assignment> assignment
 %type <math_assignment> math_assignment
@@ -193,7 +202,27 @@ function_instruction: variable_definition EOL									{ $$ = 0; }
 	| member_call EOL															{ $$ = 0; }
 	| EMIT IDENTIFIER arguments EOL												{ $$ = 0; }
 	| assignment EOL															{ $$ = 0; }
-	| math_assignment EOL														{ $$ = 0; } 
+	| math_assignment EOL														{ $$ = 0; }
+	| loop																		{ $$ = 0; }
+	;
+
+loop: FOR OPEN_PARENTHESIS loop_initialization EOL loop_condition 
+		EOL loop_iteration CLOSE_PARENTHESIS function_block						{ $$ = 0; }
+	;
+
+loop_initialization: variable_definition										{ $$ = 0; }
+	| assignment																{ $$ = 0; }
+	| math_assignment															{ $$ = 0; }
+	|																			{ $$ = 0; }
+	;
+
+loop_condition: expression														{ $$ = 0; }
+	|																			{ $$ = 0; }
+	;
+
+loop_iteration: assignment														{ $$ = 0; }
+	| math_assignment															{ $$ = 0; }
+	|																			{ $$ = 0; }
 	;
 
 assignable: IDENTIFIER															{ $$ = 0; }

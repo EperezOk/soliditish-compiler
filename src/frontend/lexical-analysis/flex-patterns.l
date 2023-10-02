@@ -45,6 +45,7 @@ string          \"[^"]*\"
 
 "if"                                        { return TokenPatternAction(yytext, IF); }
 "else"                                      { return TokenPatternAction(yytext, ELSE); }
+"for"                                       { return TokenPatternAction(yytext, FOR); }
 
 "ERC20"                                     { return TokenPatternAction(yytext, T_ERC20); }
 "ERC721"                                    { return TokenPatternAction(yytext, T_ERC721); }
