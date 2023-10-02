@@ -1,0 +1,13 @@
+contract TokenMinter {
+
+    // Las propiedades son privadas por defecto
+    ERC20 token = 0x24862BDE3581a23552CE4EE712614550d7aE49FC;
+
+    // Las funciones son no-reentrantes y privadas por defecto
+    @public
+    function mint(address to) {
+       log("Minting to", to);
+       token.mint(to, 1e18);
+    }
+
+}

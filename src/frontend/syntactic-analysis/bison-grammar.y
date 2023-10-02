@@ -230,7 +230,7 @@ loop_iteration: assignment														{ $$ = 0; }
 	;
 
 assignable: IDENTIFIER															{ $$ = 0; }
-	| IDENTIFIER OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
+	| IDENTIFIER OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET			{ $$ = 0; }
 
 assignment: assignable EQ expression											{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
 	| assignable EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET			{ $$ = 0; }
@@ -273,7 +273,7 @@ data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	| T_UINT																	{ $$ = 0; }
 	| T_INT																		{ $$ = 0; }
 	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = 0; }
-	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
+	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
 
 function_definition: decorators 
@@ -315,8 +315,7 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFac
 	;
 
 constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
-	| IDENTIFIER OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
-	| IDENTIFIER																{ $$ = 0; }
+	| assignable																{ $$ = 0; }
 	| ADDRESS																	{ $$ = 0; }
 	| BOOLEAN																	{ $$ = 0; }
 	| STRING																	{ $$ = 0; }
