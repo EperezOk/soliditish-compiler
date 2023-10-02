@@ -69,6 +69,14 @@ string          \"[^"]*\"
 ">"											{ return TokenPatternAction(yytext, GT); }
 ">="										{ return TokenPatternAction(yytext, GTE); }
 
+"++"                                        { return TokenPatternAction(yytext, INC); }
+"--"                                        { return TokenPatternAction(yytext, DEC); }
+"+="                                        { return TokenPatternAction(yytext, ADD_EQ); }
+"-="                                        { return TokenPatternAction(yytext, SUB_EQ); }
+"*="                                        { return TokenPatternAction(yytext, MUL_EQ); }
+"/="                                        { return TokenPatternAction(yytext, DIV_EQ); }
+"%="                                        { return TokenPatternAction(yytext, MOD_EQ); }
+
 "&&"										{ return TokenPatternAction(yytext, AND); }
 "||"										{ return TokenPatternAction(yytext, OR); }
 "!"											{ return TokenPatternAction(yytext, NOT); }

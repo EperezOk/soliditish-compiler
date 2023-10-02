@@ -29,6 +29,8 @@
 	int member_call;
 	int arguments;
 	int variable_definition;
+	int math_assignment;
+	int math_assignment_operator;
 	int parameters;
 	int data_type;
 	int parameter_definition;
@@ -60,6 +62,13 @@
 %token <token> DIV
 %token <token> MOD
 %token <token> EXP
+%token <token> INC
+%token <token> ADD_EQ
+%token <token> DEC
+%token <token> SUB_EQ
+%token <token> MUL_EQ
+%token <token> DIV_EQ
+%token <token> MOD_EQ
 
 // Comparadores
 %token <token> IS_EQ
@@ -120,6 +129,8 @@
 %type <contract_instruction> contract_instruction
 %type <function_instruction> function_instruction
 %type <variable_definition> variable_definition
+%type <math_assignment> math_assignment
+%type <math_assignment_operator> math_assignment_operator
 %type <parameters> parameters
 %type <data_type> data_type
 %type <function_definition> function_definition
@@ -177,6 +188,19 @@ function_instruction: variable_definition EOL									{ $$ = 0; }
 	| function_call EOL															{ $$ = 0; }
 	| member_call EOL															{ $$ = 0; }
 	| EMIT IDENTIFIER arguments EOL												{ $$ = 0; }
+	| math_assignment EOL														{ $$ = 0; } 
+	;
+
+math_assignment: IDENTIFIER math_assignment_operator expression					{ $$ = 0; }
+	| IDENTIFIER INC 															{ $$ = 0; }
+	| IDENTIFIER DEC															{ $$ = 0; }
+	;
+
+math_assignment_operator: ADD_EQ												{ $$ = 0; }
+	| SUB_EQ																	{ $$ = 0; }
+	| MUL_EQ																	{ $$ = 0; }
+	| DIV_EQ																	{ $$ = 0; }
+	| MOD_EQ																	{ $$ = 0; }
 	;
 
 function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = 0; }

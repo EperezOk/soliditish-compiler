@@ -1,0 +1,14 @@
+contract TokenMinter {
+    int n = 5;
+
+    function test() {
+        int k = 2;
+        n++;
+        n--;
+        n += 1;
+        n -= 1;
+        n /= k;
+        n *= n;
+        n %= 1e18;
+    }
+}
