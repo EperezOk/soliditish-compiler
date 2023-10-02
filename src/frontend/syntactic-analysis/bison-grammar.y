@@ -38,7 +38,7 @@
 	int expression;
 	int factor;
 	int constant;
-
+	
 	// Terminales.
 	token token;
 	int integer;
@@ -214,10 +214,10 @@ arguments: arguments COMMA expression											{ $$ = 0; }
 member_call: IDENTIFIER DOT function_call										{ $$ = 0; }
 	;
 
-variable_definition: data_type IDENTIFIER										{ $$ = 0; }
-	| data_type IDENTIFIER EQ expression										{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
-	/* TODO: inicializacion de arrays */
-	| data_type IDENTIFIER EQ function_call										{ $$ = 0; }
+variable_definition: data_type IDENTIFIER														{ $$ = 0; }
+	| data_type IDENTIFIER EQ expression														{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
+	| data_type IDENTIFIER EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET				{ $$ = 0; }
+	| data_type IDENTIFIER EQ function_call														{ $$ = 0; }
 	;
 
 data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
@@ -232,14 +232,14 @@ data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
 	| data_type OPEN_SQUARE_BRACKET INTEGER CLOSE_SQUARE_BRACKET				{ $$ = 0; }
 	;
 
-function_definition: FUNCTION IDENTIFIER parameter_definition function_block		{ $$ = FunctionDefinitionGrammarAction($2); }
+function_definition: FUNCTION IDENTIFIER parameter_definition function_block	{ $$ = FunctionDefinitionGrammarAction($2); }
 	;
 
-parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS							{ $$ = EmptyArgumentListGrammarAction(); }
+parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS						{ $$ = EmptyArgumentListGrammarAction(); }
 	| OPEN_PARENTHESIS parameters CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction(); }
 	;
 
-parameters: parameters COMMA data_type IDENTIFIER									{ $$ = ArgumentDefinitionGrammarAction(); }
+parameters: parameters COMMA data_type IDENTIFIER								{ $$ = ArgumentDefinitionGrammarAction(); }
 	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction(); }
 	;
 

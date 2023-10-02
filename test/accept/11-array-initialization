@@ -1,0 +1,7 @@
+contract myContract {
+    uint[] a = [1, 2, 3];
+
+    uint[] b = [1];
+
+    address[] addresses = [0x1A55efc396529724f499748Ecb812405c3035c8D, 0x1A55efc396529724f499748Ecb812405c3035c8D, 0x1A55efc396529724f499748Ecb812405c3035c8D];
+}
