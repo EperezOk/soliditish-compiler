@@ -40,6 +40,14 @@ token StringValuePatternAction(const char *lexeme, const int length, token token
 	return token;
 }
 
+token BooleanPatternAction(const char *lexeme, const int length) {
+	LogDebug("[Flex] BooleanPatternAction: '%s' (length = %d).", lexeme, length);
+	char *lexemeCopy = strndup(lexeme, length);
+	yylval.integer = strncmp(lexemeCopy, "true", length) == 0; // 1 = true, 0 = false
+	free(lexemeCopy);
+	return BOOLEAN;
+}
+
 token IntegerPatternAction(const char *lexeme, const int length) {
 	LogDebug("[Flex] IntegerPatternAction: '%s' (length = %d).", lexeme, length);
 	char *lexemeCopy = strndup(lexeme, length);

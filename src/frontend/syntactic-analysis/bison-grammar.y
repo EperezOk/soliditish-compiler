@@ -6,47 +6,38 @@
 
 // Tipos de dato utilizados en las variables semánticas ($$, $1, $2, etc.).
 %union {
-	// No-terminales (backend).
-	/*
-	Program program;
-	Expression expression;
-	Factor factor;
-	Constant constant;
-	...
-	*/
-
-	// No-terminales (frontend).
-	int program;
-	int contract_definition;
-	int contract_block;
-	int function_block;
-	int conditional;
-	int contract_instructions;
-	int function_instructions;
-	int contract_instruction;
-	int function_instruction;
-	int function_call;
-	int member_call;
-	int arguments;
-	int variable_definition;
-	int loop;
-	int loop_initialization;
-	int loop_condition;
-	int loop_iteration;
-	int assignable;
-	int assignment;
-	int math_assignment;
-	int math_assignment_operator;
-	int parameters;
-	int data_type;
-	int parameter_definition;
-	int decorators;
-	int function_definition;
-	int expression;
-	int factor;
-	int constant;
+	// No-terminales
+	Program *program;
+	ContractDefinition *contract_definition;
+	ContractBlock *contract_block;
+	FunctionBlock *function_block;
+	Conditional *conditional;
+	ContractInstructions *contract_instructions;
+	ContractInstruction *contract_instruction;
+	FunctionInstructions *function_instructions;
+	FunctionInstruction *function_instruction;
+	Loop *loop;
+	LoopInitialization *loop_initialization;
+	LoopCondition *loop_condition;
+	LoopIteration *loop_iteration;
+	Assignable *assignable;
+	Assignment *assignment;
+	MathAssignment *math_assignment;
+	MathAssignmentOperator *math_assignment_operator;
+	FunctionCall *function_call;
+	Arguments *arguments;
+	MemberCall *member_call;
+	VariableDefinition *variable_definition;
+	DataType *data_type;
+	FunctionDefinition *function_definition;
+	Decorators *decorators;
+	ParameterDefinition *parameter_definition;
+	Parameters *parameters;
+	Expression *expression;
+	Factor *factor;
+	Constant *constant;
 	
-	// Terminales.
+	// Terminales
 	token token;
 	int integer;
 	char *string;
@@ -120,7 +111,7 @@
 
 // Constantes
 %token <string> ADDRESS
-%token <string> BOOLEAN
+%token <integer> BOOLEAN
 %token <string> STRING
 %token <integer> INTEGER
 %token <string> SCIENTIFIC_NOTATION
@@ -173,45 +164,45 @@
 program: contract_definition													{ $$ = ProgramGrammarAction($1); }
 	;
 
-contract_definition: CONTRACT IDENTIFIER contract_block							{ $$ = ContractDefinitionGrammarAction($2); }
+contract_definition: CONTRACT IDENTIFIER contract_block							{ $$ = ContractDefinitionGrammarAction($2, $3); }
 	;
 
-contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ $$ = BlockGrammarAction($2); }
+contract_block: OPEN_CURLY_BRACKET contract_instructions CLOSE_CURLY_BRACKET 	{ $$ = ContractBlockGrammarAction($2); }
 	;
 
-function_block: OPEN_CURLY_BRACKET function_instructions CLOSE_CURLY_BRACKET	{ $$ = BlockGrammarAction($2); }
+function_block: OPEN_CURLY_BRACKET function_instructions CLOSE_CURLY_BRACKET	{ $$ = FunctionBlockGrammarAction($2); }
 	;
 
-conditional: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block	{ $$ = 0; }
+conditional: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block	{ $$ = ConditionalGrammarAction($3, $5, NULL); }
 	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block
-		ELSE function_block														{ $$ = 0; }
+		ELSE function_block														{ $$ = ConditionalGrammarAction($3, $5, $7); }
 	;
 
-contract_instructions: contract_instructions contract_instruction				{ $$ = InstructionsGrammarAction($1, $2); } 
-	| %empty																	{ $$ = EmptyInstructionGrammarAction(); }
+contract_instructions: contract_instructions contract_instruction				{ $$ = ContractInstructionsGrammarAction($1, $2); } 
+	| %empty																	{ $$ = ContractInstructionsGrammarAction(NULL, NULL); }
 	;
 
-contract_instruction: decorators variable_definition SEMI						{ $$ = 0; }
-	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
-	| EVENT IDENTIFIER parameter_definition SEMI								{ $$ = 0; }
+contract_instruction: decorators variable_definition SEMI						{ $$ = StateVariableContractInstructionGrammarAction($1, $2); }
+	| function_definition														{ $$ = FunctionDefinitionContractInstructionGrammarAction($1); }
+	| EVENT IDENTIFIER parameter_definition SEMI								{ $$ = EventDefinitionContractInstructionGrammarAction($2, $3); }
 	;
 
-function_instructions: function_instructions function_instruction				{ $$ = InstructionsGrammarAction($1, $2); }
-	| %empty																	{ $$ = EmptyInstructionGrammarAction(); }
+function_instructions: function_instructions function_instruction				{ $$ = FunctionInstructionsGrammarAction($1, $2); }
+	| %empty																	{ $$ = FunctionInstructionsGrammarAction(NULL, NULL); }
 	;
 
-function_instruction: variable_definition SEMI									{ $$ = 0; }
-	| conditional																{ $$ = 0; }
-	| function_call SEMI														{ $$ = 0; }
-	| member_call SEMI															{ $$ = 0; }
-	| EMIT IDENTIFIER arguments SEMI											{ $$ = 0; }
-	| assignment SEMI															{ $$ = 0; }
-	| math_assignment SEMI														{ $$ = 0; }
-	| loop																		{ $$ = 0; }
+function_instruction: variable_definition SEMI									{ $$ = VariableDefinitionFunctionInstructionGrammarAction($1); }
+	| conditional																{ $$ = ConditionalFunctionInstructionGrammarAction($1); }
+	| function_call SEMI														{ $$ = FunctionCallFunctionInstructionGrammarAction($1); }
+	| member_call SEMI															{ $$ = MemberCallFunctionInstructionGrammarAction($1); }
+	| EMIT IDENTIFIER arguments SEMI											{ $$ = EmitEventFunctionInstructionGrammarAction($2, $3); }
+	| assignment SEMI															{ $$ = AssignmentFunctionInstructionGrammarAction($1); }
+	| math_assignment SEMI														{ $$ = MathAssignmentFunctionInstructionGrammarAction($1); }
+	| loop																		{ $$ = LoopFunctionInstructionGrammarAction($1); }
 	;
 
 loop: FOR OPEN_PARENTHESIS loop_initialization SEMI loop_condition 
-		SEMI loop_iteration CLOSE_PARENTHESIS function_block					{ $$ = 0; }
+		SEMI loop_iteration CLOSE_PARENTHESIS function_block					{ $$ = LoopGrammarAction($3, $5, $7, $9); }
 	;
 
 loop_initialization: variable_definition										{ $$ = 0; }
@@ -264,23 +255,23 @@ variable_definition: data_type IDENTIFIER										{ $$ = 0; }
 	| data_type assignment														{ $$ = 0; }
 	;
 
-data_type: T_ERC20																{ $$ = ERC20DefinitionGrammarAction(); }
-	| T_ERC721																	{ $$ = 0; }
-	| T_BYTES																	{ $$ = 0; }
-	| T_STRING																	{ $$ = 0; }
-	| T_BOOLEAN																	{ $$ = 0; }
-	| T_ADDRESS																	{ $$ = 0; }
-	| T_UINT																	{ $$ = 0; }
-	| T_INT																		{ $$ = 0; }
-	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = 0; }
-	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = 0; }
+data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(ERC20); }
+	| T_ERC721																	{ $$ = DataTypeSimpleGrammarAction(ERC721); }
+	| T_BYTES																	{ $$ = DataTypeSimpleGrammarAction(BYTES); }
+	| T_STRING																	{ $$ = DataTypeSimpleGrammarAction(STRING); }
+	| T_BOOLEAN																	{ $$ = DataTypeSimpleGrammarAction(BOOLEAN); }
+	| T_ADDRESS																	{ $$ = DataTypeSimpleGrammarAction(ADDRESS); }
+	| T_UINT																	{ $$ = DataTypeSimpleGrammarAction(UINT); }
+	| T_INT																		{ $$ = DataTypeSimpleGrammarAction(INT); }
+	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = DatatypeArrayGrammarAction($1, NULL); }
+	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = DatatypeArrayGrammarAction($1, $3); }
 	;
 
 function_definition: decorators 
 		FUNCTION IDENTIFIER parameter_definition function_block					{ $$ = FunctionDefinitionGrammarAction($3); }
 	;
 
-decorators: DECORATOR decorators												{ $$ = 0; }
+decorators: DECORATOR decorators												{ $$ = DecoratorGrammarAction($1); }
 	| %empty																	{ $$ = 0; }
 	;
 
@@ -314,12 +305,12 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFac
 	| constant																	{ $$ = ConstantFactorGrammarAction($1); }
 	;
 
-constant: INTEGER																{ $$ = IntegerConstantGrammarAction($1); }
-	| assignable																{ $$ = 0; }
-	| ADDRESS																	{ $$ = 0; }
-	| BOOLEAN																	{ $$ = 0; }
-	| STRING																	{ $$ = 0; }
-	| SCIENTIFIC_NOTATION														{ $$ = 0; }
+constant: INTEGER																{ $$ = IntegerConstantGrammarAction(INTEGER, $1); }
+	| assignable																{ $$ = AssignableConstantGrammarAction($1); }
+	| ADDRESS																	{ $$ = StringConstantGrammarAction(ADDRESS, $1); }
+	| BOOLEAN																	{ $$ = IntegerConstantGrammarAction(BOOLEAN, $1); }
+	| STRING																	{ $$ = StringConstantGrammarAction(STRING, $1); }
+	| SCIENTIFIC_NOTATION														{ $$ = StringConstantGrammarAction(SCIENTIFIC_NOTATION, $1); }
 	;
 
 %%

@@ -19,8 +19,8 @@ typedef struct {
 } Program;
 
 typedef struct {
-	ContractBlock *block;
 	char *identifier;
+	ContractBlock *block;
 } ContractDefinition;
 
 typedef struct {
@@ -39,8 +39,8 @@ typedef enum {
 typedef struct {
 	ConditionalType type;
 	Expression *condition;
-	FunctionBlock *functionBlock;
-	FunctionBlock *elseFunctionBlock;
+	FunctionBlock *ifBlock;
+	FunctionBlock *elseBlock;
 } Conditional;
 
 typedef enum {
@@ -97,8 +97,8 @@ typedef struct {
 	Conditional *conditional;
 	FunctionCall *functionCall;
 	MemberCall *memberCall;
-	Arguments *eventArgs;
 	char *eventIdentifier;
+	Arguments *eventArgs;
 	Assignment *assignment;
 	MathAssignment *mathAssignment;
 	Loop *loop;
@@ -213,7 +213,7 @@ typedef enum {
 	SINGLE
 } ArgumentsType;
 
-struct Arguments{
+struct Arguments {
 	ArgumentsType type;
 	Arguments *arguments;
 	Expression *expression;
@@ -340,7 +340,7 @@ typedef struct {
 
 typedef enum {
 	INTEGER,
-	ASSIGNABLE,
+	VARIABLE,
 	ADDRESS,
 	BOOLEAN,
 	STRING,
@@ -349,7 +349,7 @@ typedef enum {
 
 typedef struct {
 	ConstantType type;
-	Assignable *assignable;
+	Assignable *variable;
 	int value;
 	char *string;
 } Constant;
