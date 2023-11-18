@@ -101,7 +101,7 @@
 %token <token> CLOSE_PARENTHESIS
 %token <token> OPEN_SQUARE_BRACKET
 %token <token> CLOSE_SQUARE_BRACKET
-%token <token> EOL
+%token <token> SEMI // semi-colon
 %token <token> EQ
 %token <token> COMMA
 %token <token> DOT
@@ -188,45 +188,45 @@ conditional: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS function_block	{ $
 	;
 
 contract_instructions: contract_instructions contract_instruction				{ $$ = InstructionsGrammarAction($1, $2); } 
-	|																			{ $$ = EmptyInstructionGrammarAction(); }
+	| %empty																	{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-contract_instruction: decorators variable_definition EOL						{ $$ = 0; }
+contract_instruction: decorators variable_definition SEMI						{ $$ = 0; }
 	| function_definition														{ $$ = FunctionInstructionGrammarAction(); }
-	| EVENT IDENTIFIER parameter_definition EOL									{ $$ = 0; }
+	| EVENT IDENTIFIER parameter_definition SEMI								{ $$ = 0; }
 	;
 
 function_instructions: function_instructions function_instruction				{ $$ = InstructionsGrammarAction($1, $2); }
-	|																			{ $$ = EmptyInstructionGrammarAction(); }
+	| %empty																	{ $$ = EmptyInstructionGrammarAction(); }
 	;
 
-function_instruction: variable_definition EOL									{ $$ = 0; }
+function_instruction: variable_definition SEMI									{ $$ = 0; }
 	| conditional																{ $$ = 0; }
-	| function_call EOL															{ $$ = 0; }
-	| member_call EOL															{ $$ = 0; }
-	| EMIT IDENTIFIER arguments EOL												{ $$ = 0; }
-	| assignment EOL															{ $$ = 0; }
-	| math_assignment EOL														{ $$ = 0; }
+	| function_call SEMI														{ $$ = 0; }
+	| member_call SEMI															{ $$ = 0; }
+	| EMIT IDENTIFIER arguments SEMI											{ $$ = 0; }
+	| assignment SEMI															{ $$ = 0; }
+	| math_assignment SEMI														{ $$ = 0; }
 	| loop																		{ $$ = 0; }
 	;
 
-loop: FOR OPEN_PARENTHESIS loop_initialization EOL loop_condition 
-		EOL loop_iteration CLOSE_PARENTHESIS function_block						{ $$ = 0; }
+loop: FOR OPEN_PARENTHESIS loop_initialization SEMI loop_condition 
+		SEMI loop_iteration CLOSE_PARENTHESIS function_block					{ $$ = 0; }
 	;
 
 loop_initialization: variable_definition										{ $$ = 0; }
 	| assignment																{ $$ = 0; }
 	| math_assignment															{ $$ = 0; }
-	|																			{ $$ = 0; }
+	| %empty																	{ $$ = 0; }
 	;
 
 loop_condition: expression														{ $$ = 0; }
-	|																			{ $$ = 0; }
+	| %empty																	{ $$ = 0; }
 	;
 
 loop_iteration: assignment														{ $$ = 0; }
 	| math_assignment															{ $$ = 0; }
-	|																			{ $$ = 0; }
+	| %empty																	{ $$ = 0; }
 	;
 
 assignable: IDENTIFIER															{ $$ = 0; }
@@ -281,7 +281,7 @@ function_definition: decorators
 	;
 
 decorators: DECORATOR decorators												{ $$ = 0; }
-	|																			{ $$ = 0; }
+	| %empty																	{ $$ = 0; }
 	;
 
 parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS						{ $$ = EmptyArgumentListGrammarAction(); }

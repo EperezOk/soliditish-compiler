@@ -106,7 +106,7 @@ string          \"[^"]*\"
 
 "="                                         { return TokenPatternAction(yytext, EQ); }
 
-";"                                         { return TokenPatternAction(yytext, EOL); }
+";"                                         { return TokenPatternAction(yytext, SEMI); }
 
 {whitespace}+								{ IgnoredPatternAction(yytext, yyleng); }
 
