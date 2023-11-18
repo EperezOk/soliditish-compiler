@@ -25,7 +25,7 @@ script/build.sh
 1. Create a file with the program to compile.
 2. Run the compiler from the root directory of the project, passing the path to the program to compile as a parameter:
     ```bash
-    script/start.sh program
+    script/start.sh <program>
     ```
 3. The compiler will generate a file with the same name as the program, but with the extension `.sol`, in the same directory as the program.
 
