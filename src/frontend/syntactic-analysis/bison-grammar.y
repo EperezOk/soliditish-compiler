@@ -255,16 +255,16 @@ variable_definition: data_type IDENTIFIER										{ $$ = 0; }
 	| data_type assignment														{ $$ = 0; }
 	;
 
-data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(ERC20); }
-	| T_ERC721																	{ $$ = DataTypeSimpleGrammarAction(ERC721); }
-	| T_BYTES																	{ $$ = DataTypeSimpleGrammarAction(BYTES); }
-	| T_STRING																	{ $$ = DataTypeSimpleGrammarAction(STRING); }
-	| T_BOOLEAN																	{ $$ = DataTypeSimpleGrammarAction(BOOLEAN); }
-	| T_ADDRESS																	{ $$ = DataTypeSimpleGrammarAction(ADDRESS); }
-	| T_UINT																	{ $$ = DataTypeSimpleGrammarAction(UINT); }
-	| T_INT																		{ $$ = DataTypeSimpleGrammarAction(INT); }
-	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = DatatypeArrayGrammarAction($1, NULL); }
-	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = DatatypeArrayGrammarAction($1, $3); }
+data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC20); }
+	| T_ERC721																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC721); }
+	| T_BYTES																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_BYTES); }
+	| T_STRING																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_STRING); }
+	| T_BOOLEAN																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_BOOLEAN); }
+	| T_ADDRESS																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ADDRESS); }
+	| T_UINT																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_UINT); }
+	| T_INT																		{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_INT); }
+	| data_type OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET						{ $$ = DataTypeArrayGrammarAction($1, NULL); }
+	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = DataTypeArrayGrammarAction($1, $3); }
 	;
 
 function_definition: decorators 

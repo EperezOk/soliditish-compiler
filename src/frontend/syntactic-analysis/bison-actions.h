@@ -15,28 +15,28 @@
 Program *ProgramGrammarAction(ContractDefinition *contract);
 
 // Expresión.
-ContractDefinition *ContractDefinitionGrammarAction(char *identifier, ContractBlock *block);
-ContractBlock *ContractBlockGrammarAction(ContractInstructions *instructions);
-FunctionBlock *FunctionBlockGrammarAction(FunctionInstructions *instructions);
-Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBlock, FunctionBlock *elseBlock);
-ContractInstructions *ContractInstructionsGrammarAction(ContractInstructions *instructions, ContractInstruction *instruction);
+ContractDefinition *ContractDefinitionGrammarAction(char *identifier, struct ContractBlock *block);
+ContractBlock *ContractBlockGrammarAction(struct ContractInstructions *instructions);
+FunctionBlock *FunctionBlockGrammarAction(struct FunctionInstructions *instructions);
+Conditional *ConditionalGrammarAction(struct Expression *condition, struct FunctionBlock *ifBlock, struct FunctionBlock *elseBlock);
+ContractInstructions *ContractInstructionsGrammarAction(struct ContractInstructions *instructions, struct ContractInstruction *instruction);
 
-ContractInstruction *StateVariableContractInstructionGrammarAction(Decorators *variableDecorators, VariableDefinition *variableDefinition);
-ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(FunctionDefinition *functionDefinition);
-ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, ParameterDefinition *eventParams);
+ContractInstruction *StateVariableContractInstructionGrammarAction(struct Decorators *variableDecorators, struct VariableDefinition *variableDefinition);
+ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(struct FunctionDefinition *functionDefinition);
+ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, struct ParameterDefinition *eventParams);
 
-FunctionInstructions *FunctionInstructionsGrammarAction(FunctionInstructions *instructions, FunctionInstruction *instruction);
+FunctionInstructions *FunctionInstructionsGrammarAction(struct FunctionInstructions *instructions, struct FunctionInstruction *instruction);
 
-FunctionInstruction *VariableDefinitionFunctionInstructionGrammarAction(VariableDefinition *variableDefinition);
-FunctionInstruction *ConditionalFunctionInstructionGrammarAction(Conditional *conditional);
-FunctionInstruction *FunctionCallFunctionInstructionGrammarAction(FunctionCall *functionCall);
-FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memberCall);
-FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs);
-FunctionInstruction *AssignmentFunctionInstructionGrammarAction(Assignment *assignment);
-FunctionInstruction *MathAssignmentFunctionInstructionGrammarAction(MathAssignment *mathAssignment);
-FunctionInstruction *LoopFunctionInstructionGrammarAction(Loop *loop);
+FunctionInstruction *VariableDefinitionFunctionInstructionGrammarAction(struct VariableDefinition *variableDefinition);
+FunctionInstruction *ConditionalFunctionInstructionGrammarAction(struct Conditional *conditional);
+FunctionInstruction *FunctionCallFunctionInstructionGrammarAction(struct FunctionCall *functionCall);
+FunctionInstruction *MemberCallFunctionInstructionGrammarAction(struct MemberCall *memberCall);
+FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, struct Arguments *eventArgs);
+FunctionInstruction *AssignmentFunctionInstructionGrammarAction(struct Assignment *assignment);
+FunctionInstruction *MathAssignmentFunctionInstructionGrammarAction(struct MathAssignment *mathAssignment);
+FunctionInstruction *LoopFunctionInstructionGrammarAction(struct Loop *loop);
 
-Loop * LoopGrammarAction(LoopInitialization *loopInitialization, LoopCondition *loopCondition, LoopIteration *loopIteration, FunctionBlock *functionBlock);
+Loop * LoopGrammarAction(struct LoopInitialization *loopInitialization, struct LoopCondition *loopCondition, struct LoopIteration *loopIteration, struct FunctionBlock *functionBlock);
 
 
 int InstructionsGrammarAction(int instructions, int instruction);
@@ -50,7 +50,7 @@ int ArgumentDefinitionGrammarAction();
 
 // Instruction
 DataType *DataTypeSimpleGrammarAction(DataTypeType dataTypeType);
-DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression);
+DataType *DataTypeArrayGrammarAction(struct DataType *dataType, struct Expression *expression);
 
 int EmptyInstructionGrammarAction();
 

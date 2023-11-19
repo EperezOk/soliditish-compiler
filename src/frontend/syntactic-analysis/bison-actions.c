@@ -32,7 +32,7 @@ void yyerror(const char * string) {
 * indica que efectivamente el programa de entrada se pudo generar con esta
 * gramática, o lo que es lo mismo, que el programa pertenece al lenguaje.
 */
-Program *ProgramGrammarAction(ContractDefinition *contract) {
+Program *ProgramGrammarAction(struct ContractDefinition *contract) {
 	Program *program = calloc(1, sizeof(Program));
 	program->contract = contract;
 	state.program = program;
@@ -75,7 +75,7 @@ Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBl
 
 ContractInstructions *ContractInstructionsGrammarAction(ContractInstructions *instructions, ContractInstruction *instruction) {
 	ContractInstructions *contractInstructions = calloc(1, sizeof(ContractInstructions));
-	contractInstructions->type = instructions == NULL ? EMPTY : MULTIPLE;
+	contractInstructions->type = instructions == NULL ? CONTRACT_INSTRUCTIONS_EMPTY : CONTRACT_INSTRUCTIONS_MULTIPLE;
 	contractInstructions->instructions = instructions;
 	contractInstructions->instruction = instruction;
 	return contractInstructions;
@@ -106,7 +106,7 @@ ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *event
 
 FunctionInstructions *FunctionInstructionsGrammarAction(FunctionInstructions *instructions, FunctionInstruction *instruction) {
 	FunctionInstructions *functionInstructions = calloc(1, sizeof(FunctionInstructions));
-	functionInstructions->type = instructions == NULL ? EMPTY : MULTIPLE;
+	functionInstructions->type = instructions == NULL ? FUNCTION_INSTRUCTIONS_EMPTY : FUNCTION_INSTRUCTIONS_MULTIPLE;
 	functionInstructions->instructions = instructions;
 	functionInstructions->instruction = instruction;
 	return functionInstructions;
@@ -114,35 +114,35 @@ FunctionInstructions *FunctionInstructionsGrammarAction(FunctionInstructions *in
 
 FunctionInstruction *VariableDefinitionFunctionInstructionGrammarAction(VariableDefinition *variableDefinition) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = VARIABLE_DEFINITION;
+	functionInstruction->type = FUNCTION_INSTRUCTION_VARIABLE_DEFINITION;
 	functionInstruction->variableDefinition = variableDefinition;
 	return functionInstruction;	
 }
 
 FunctionInstruction *ConditionalFunctionInstructionGrammarAction(Conditional *conditional) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = CONDITIONAL;
+	functionInstruction->type = FUNCTION_INSTRUCTION_CONDITIONAL;
 	functionInstruction->conditional = conditional;
 	return functionInstruction;	
 }
 
 FunctionInstruction *FunctionCallFunctionInstructionGrammarAction(FunctionCall *functionCall) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = FUNCTION_CALL;
+	functionInstruction->type = FUNCTION_INSTRUCTION_FUNCTION_CALL;
 	functionInstruction->functionCall = functionCall;
 	return functionInstruction;	
 }
 
 FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memberCall) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = MEMBER_CALL;
+	functionInstruction->type = FUNCTION_INSTRUCTION_MEMBER_CALL;
 	functionInstruction->memberCall = memberCall;
 	return functionInstruction;	
 }
 
 FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = EMIT_EVENT;
+	functionInstruction->type = FUNCTION_INSTRUCTION_EMIT_EVENT;
 	functionInstruction->eventIdentifier = eventIdentifier;
 	functionInstruction->eventArgs = eventArgs;
 	return functionInstruction;	
@@ -150,21 +150,21 @@ FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdenti
 
 FunctionInstruction *AssignmentFunctionInstructionGrammarAction(Assignment *assignment) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = ASSIGNMENT;
+	functionInstruction->type = FUNCTION_INSTRUCTION_ASSIGNMENT;
 	functionInstruction->assignment = assignment;
 	return functionInstruction;	
 }
 
 FunctionInstruction *MathAssignmentFunctionInstructionGrammarAction(MathAssignment *mathAssignment) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = MATH_ASSIGNMENT;
+	functionInstruction->type = FUNCTION_INSTRUCTION_MATH_ASSIGNMENT;
 	functionInstruction->mathAssignment = mathAssignment;
 	return functionInstruction;	
 }
 
 FunctionInstruction *LoopFunctionInstructionGrammarAction(Loop *loop) {
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
-	functionInstruction->type = LOOP;
+	functionInstruction->type = FUNCTION_INSTRUCTION_LOOP;
 	functionInstruction->loop = loop;
 	return functionInstruction;	
 }
@@ -192,7 +192,7 @@ DataType *DataTypeSimpleGrammarAction(DataTypeType type) {
 
 DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression) {
 	DataType *arrayDataType = calloc(1, sizeof(DataType));	
-	arrayDataType->type = expression == NULL ? DYNAMIC_ARRAY : STATIC_ARRAY;
+	arrayDataType->type = expression == NULL ? DATA_TYPE_DYNAMIC_ARRAY : DATA_TYPE_STATIC_ARRAY;
 	arrayDataType->dataType = dataType;
 	return arrayDataType;
 }
@@ -234,7 +234,7 @@ int ArgumentDefinitionGrammarAction() {
 
 Expression *AdditionExpressionGrammarAction(Expression *leftExpression, Expression *rightExpression) {
 	Expression *expression = calloc(1, sizeof(Expression));
-	expression->type = ADDITION;
+	expression->type = EXPRESSION_ADDITION;
 	expression->leftExpression = leftExpression;
 	expression->rightExpression = rightExpression;
 	return expression;
@@ -338,9 +338,9 @@ Constant *IntegerConstantGrammarAction(ConstantType type, int value) {
 	return constant;
 }
 
-Constant *AssignableConstantGrammarAction(Assignable *variable) {
+Constant *AssignableConstantGrammarAction(struct Assignable *variable) {
 	Constant *constant = calloc(1, sizeof(Constant));
-	constant->type = VARIABLE;
+	constant->type = CONSTANT_VARIABLE;
 	constant->variable = variable;
 	return constant;
 }

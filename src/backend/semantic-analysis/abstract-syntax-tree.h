@@ -6,29 +6,22 @@
 * auto-referenciarse, como es el caso de una "Expression", que está compuesta
 * de otras 2 expresiones.
 */
-typedef struct Expression Expression;
-typedef struct Parameters Parameters;
-typedef struct DataType DataType;
-typedef struct Decorators Decorators;
-typedef struct Arguments Arguments;
-typedef struct FunctionInstructions FunctionInstructions;
-typedef struct ContractInstructions ContractInstructions;
 
-typedef struct {
-	ContractDefinition *contract;
+typedef struct Program{
+	struct ContractDefinition *contract;
 } Program;
 
-typedef struct {
+typedef struct ContractDefinition{
 	char *identifier;
-	ContractBlock *block;
+	struct ContractBlock *block;
 } ContractDefinition;
 
-typedef struct {
-	ContractInstructions *instructions;
+typedef struct ContractBlock{
+	struct ContractInstructions *instructions;
 } ContractBlock;
 
-typedef struct {
-	FunctionInstructions *instructions;
+typedef struct FunctionBlock{
+	struct FunctionInstructions *instructions;
 } FunctionBlock;
 
 typedef enum {
@@ -36,23 +29,23 @@ typedef enum {
 	WITH_ELSE,
 } ConditionalType;
 
-typedef struct {
+typedef struct Conditional{
 	ConditionalType type;
-	Expression *condition;
-	FunctionBlock *ifBlock;
-	FunctionBlock *elseBlock;
+	struct Expression *condition;
+	struct FunctionBlock *ifBlock;
+	struct FunctionBlock *elseBlock;
 } Conditional;
 
 typedef enum {
-	MULTIPLE,
-	EMPTY,
+	CONTRACT_INSTRUCTIONS_MULTIPLE,
+	CONTRACT_INSTRUCTIONS_EMPTY,
 } ContractInstructionsType;
 
-struct ContractInstructions {
+typedef struct ContractInstructions {
 	ContractInstructionsType type;
-	ContractInstructions *instructions;
-	ContractInstruction *instruction;
-};
+	struct ContractInstructions *instructions;
+	struct ContractInstruction *instruction;
+} ContractInstructions;
 
 typedef enum {
 	STATE_VARIABLE_DECLARATION,
@@ -60,296 +53,296 @@ typedef enum {
 	EVENT_DECLARATION,
 } ContractInstructionType;
 
-typedef struct {
+typedef struct ContractInstruction{
 	ContractInstructionType type;
-	Decorators *variableDecorators;
-	VariableDefinition *variableDefinition;
-	FunctionDefinition *functionDefinition;
+	struct Decorators *variableDecorators;
+	struct VariableDefinition *variableDefinition;
+	struct FunctionDefinition *functionDefinition;
 	char *eventIdentifier;
-	ParameterDefinition *eventParams;
+	struct ParameterDefinition *eventParams;
 } ContractInstruction;
 
 typedef enum {
-	MULTIPLE,
-	EMPTY,
+	FUNCTION_INSTRUCTIONS_MULTIPLE,
+	FUNCTION_INSTRUCTIONS_EMPTY,
 } FunctionInstructionsType;
 
-struct FunctionInstructions {
+typedef struct FunctionInstructions {
 	FunctionInstructionsType type;
-	FunctionInstructions *instructions;
-	FunctionInstruction *instruction;
-};
+	struct FunctionInstructions *instructions;
+	struct FunctionInstruction *instruction;
+} FunctionInstructions;
 
 typedef enum {
-	VARIABLE_DEFINITION,
-	CONDITIONAL,
-	FUNCTION_CALL,
-	MEMBER_CALL,
-	EMIT_EVENT,
-	ASSIGNMENT,
-	MATH_ASSIGNMENT,
-	LOOP,
+	FUNCTION_INSTRUCTION_VARIABLE_DEFINITION,
+	FUNCTION_INSTRUCTION_CONDITIONAL,
+	FUNCTION_INSTRUCTION_FUNCTION_CALL,
+	FUNCTION_INSTRUCTION_MEMBER_CALL,
+	FUNCTION_INSTRUCTION_EMIT_EVENT,
+	FUNCTION_INSTRUCTION_ASSIGNMENT,
+	FUNCTION_INSTRUCTION_MATH_ASSIGNMENT,
+	FUNCTION_INSTRUCTION_LOOP,
 } FunctionInstructionType;
 
-typedef struct {
+typedef struct FunctionInstruction{
 	FunctionInstructionType type;
-	VariableDefinition *variableDefinition;
-	Conditional *conditional;
-	FunctionCall *functionCall;
-	MemberCall *memberCall;
+	struct VariableDefinition *variableDefinition;
+	struct Conditional *conditional;
+	struct FunctionCall *functionCall;
+	struct MemberCall *memberCall;
 	char *eventIdentifier;
-	Arguments *eventArgs;
-	Assignment *assignment;
-	MathAssignment *mathAssignment;
-	Loop *loop;
+	struct Arguments *eventArgs;
+	struct Assignment *assignment;
+	struct MathAssignment *mathAssignment;
+	struct Loop *loop;
 } FunctionInstruction;
 
-typedef struct {
-	LoopInitialization *loopInitialization;
-	LoopCondition *loopCondition;
-	LoopIteration *loopIteration;
-	FunctionBlock *functionBlock;
+typedef struct Loop{
+	struct LoopInitialization *loopInitialization;
+	struct LoopCondition *loopCondition;
+	struct LoopIteration *loopIteration;
+	struct FunctionBlock *functionBlock;
 } Loop;
 
 typedef enum {
-	VARIABLE_DEFINITION,
-	ASSIGNMENT,
-	MATH_ASSIGNMENT,
-	EMPTY,
+	LOOP_INITIALIZATION_VARIABLE_DEFINITION,
+	LOOP_INITIALIZATION_ASSIGNMENT,
+	LOOP_INITIALIZATION_MATH_ASSIGNMENT,
+	LOOP_INITIALIZATION_EMPTY,
 } LoopInitializationType;
 
-typedef struct {
+typedef struct LoopInitialization{
 	LoopInitializationType type;
-	VariableDefinition *variable;
-	Assignment *assignment;
-	MathAssignment *mathAssignment;
+	struct VariableDefinition *variable;
+	struct Assignment *assignment;
+	struct MathAssignment *mathAssignment;
 } LoopInitialization;
 
 typedef enum {
-	CONDITIONAL,
-	EMPTY,
+	LOOP_CONDITION_CONDITIONAL,
+	LOOP_CONDITION_EMPTY,
 } LoopConditionType;
 
-typedef struct {
+typedef struct LoopCondition{
 	LoopConditionType type;
-	Expression *condition;
+	struct Expression *condition;
 } LoopCondition;
 
 typedef enum {
-	ASSIGNMENT,
-	MATH_ASSIGNMENT,
-	EMPTY,
+	LOOP_ITERATION_ASSIGNMENT,
+	LOOP_ITERATION_MATH_ASSIGNMENT,
+	LOOP_ITERATION_EMPTY,
 } LoopIterationType;
 
-typedef struct {
+typedef struct LoopIteration{
 	LoopIterationType type;
-	Assignment *assignment;
-	MathAssignment *mathAssignment;
+	struct Assignment *assignment;
+	struct MathAssignment *mathAssignment;
 } LoopIteration;
 
 typedef enum {
-	VARIABLE,
-	ARRAY,
+	ASSIGNABLE_VARIABLE,
+	ASSIGNABLE_ARRAY,
 } AssignableType;
 
-typedef struct {
+typedef struct Assignable{
 	AssignableType type;
-	Expression *expression;
+	struct Expression *expression;
 	char *identifier;
 } Assignable;
 
 typedef enum {
-	EXPRESSION,
-	ARRAY_INITIALIZATION,
-	FUNCTION_CALL,
+	ASSIGNMENT_EXPRESSION,
+	ASSIGNMENT_ARRAY_INITIALIZATION,
+	ASSIGNMENT_FUNCTION_CALL,
 } AssignmentType;
 
-typedef struct {
+typedef struct Assignment{
 	AssignmentType type;
-	Assignable *assignable;
-	Expression *expression;
-	Arguments *arrayIndex;
-	FunctionCall *functionCall;
+	struct Assignable *assignable;
+	struct Expression *expression;
+	struct Arguments *arrayIndex;
+	struct FunctionCall *functionCall;
 } Assignment;
 
 typedef enum {
-	OPERATOR,
-	INCREMENT,
-	DECREMENT,
+	MATH_ASSIGNMENT_OPERATOR,
+	MATH_ASSIGNMENT_INCREMENT,
+	MATH_ASSIGNMENT_DECREMENT,
 } MathAssignmentType;
 
-typedef struct {
+typedef struct MathAssignment{
 	MathAssignmentType type;
-	Assignable *assignable;
-	MathAssignmentOperator *operator;
-	Expression *expression;
+	struct Assignable *assignable;
+	struct MathAssignmentOperator *operator;
+	struct Expression *expression;
 } MathAssignment;
 
 typedef enum {
-	ADD_EQUAL,
-	SUBTRACT_EQUAL,
-	MULTIPLY_EQUAL,
-	DIVIDE_EQUAL,
-	MODULO_EQUAL,
+	MATH_ASSIGNMENT_OP_ADD_EQUAL,
+	MATH_ASSIGNMENT_OP_SUBTRACT_EQUAL,
+	MATH_ASSIGNMENT_OP_MULTIPLY_EQUAL,
+	MATH_ASSIGNMENT_OP_DIVIDE_EQUAL,
+	MATH_ASSIGNMENT_OP_MODULO_EQUAL,
 } MathAssignmentOperatorType;
 
-typedef struct {
+typedef struct MathAssignmentOperator{
 	MathAssignmentOperatorType type;
 } MathAssignmentOperator;
 
 typedef enum {
-	NO_ARGS,
-	WITH_ARGS
+	FUNCTION_CALL_NO_ARGS,
+	FUNCTION_CALL_WITH_ARGS
 } FunctionCallType;
 
-typedef struct {
+typedef struct FunctionCall{
 	FunctionCallType type;
-	Arguments *arguments;
+	struct Arguments *arguments;
 	char *identifier;
 } FunctionCall;
 
 typedef enum {
-	MULTIPLE,
-	SINGLE
+	ARGUMENTS_MULTIPLE,
+	ARGUMENTS_SINGLE
 } ArgumentsType;
 
-struct Arguments {
+typedef struct Arguments {
 	ArgumentsType type;
-	Arguments *arguments;
-	Expression *expression;
-};
+	struct Arguments *arguments;
+	struct Expression *expression;
+} Arguments;
 
-typedef struct {
-	Assignable *assignable;
-	FunctionCall *method;
+typedef struct MemberCall{
+	struct Assignable *assignable;
+	struct FunctionCall *method;
 } MemberCall;
 
-typedef enum {
-	NOT_INITIALIZED,
-	INITIALIZED
+typedef enum VariableDefinitionType{
+	VARIABLE_DEFINITION_NOT_INITIALIZED,
+	VARIABLE_DEFINITION_INITIALIZED
 } VariableDefinitionType;
 
-typedef struct {
+typedef struct VariableDefinition{
 	VariableDefinitionType type;
-	DataType *dataType;
-	Assignment *assignment;
+	struct DataType *dataType;
+	struct Assignment *assignment;
 	char *identifier;
 } VariableDefinition;
 
 typedef enum {
-	ERC20,
-	ERC721,
-	BYTES,
-	STRING,
-	BOOLEAN,
-	ADDRESS,
-	UINT,
-	INT,
-	DYNAMIC_ARRAY,
-	STATIC_ARRAY
+	DATA_TYPE_ERC20,
+	DATA_TYPE_ERC721,
+	DATA_TYPE_BYTES,
+	DATA_TYPE_STRING,
+	DATA_TYPE_BOOLEAN,
+	DATA_TYPE_ADDRESS,
+	DATA_TYPE_UINT,
+	DATA_TYPE_INT,
+	DATA_TYPE_DYNAMIC_ARRAY,
+	DATA_TYPE_STATIC_ARRAY
 } DataTypeType;
 
-struct DataType {
+typedef struct DataType {
 	DataTypeType type;
-	DataType *dataType;
-	Expression *expression;
-};
+	struct DataType *dataType;
+	struct Expression *expression;
+} DataType;
 
-typedef struct {
-	Decorators *decorators;
-	ParameterDefinition *parameterDefinition;
-	FunctionBlock *functionBlock;
+typedef struct FunctionDefinition{
+	struct Decorators *decorators;
+	struct ParameterDefinition *parameterDefinition;
+	struct FunctionBlock *functionBlock;
 	char *identifier;
 } FunctionDefinition;
 
 typedef enum {
-	WITH_DECORATORS,
-	NO_DECORATORS
+	DECORATORS_WITH_DECORATORS,
+	DECORATORS_NO_DECORATORS
 } DecoratorsType;
 
 typedef enum {
-	PUBLIC,
-	PRIVATE,
-	REENTRANT
+	DECORATORS_PUBLIC,
+	DECORATORS_PRIVATE,
+	DECORATORS_REENTRANT
 } DecoratorsValue;
 
-struct Decorators {
+typedef struct Decorators {
 	DecoratorsType type;
-	Decorators *decorators;
+	struct Decorators *decorators;
 	DecoratorsValue decorator;
-};
+} Decorators;
 
 typedef enum {
-	NO_PARAMS,
-	WITH_PARAMS
+	PARAMETERS_DEFINITION_NO_PARAMS,
+	PARAMETERS_DEFINITION_WITH_PARAMS
 } ParameterDefinitionType;
 
-typedef struct {
+typedef struct ParameterDefinition{
 	ParameterDefinitionType type;
-	Parameters *parameters;
+	struct Parameters *parameters;
 } ParameterDefinition;
 
 typedef enum {
-	MULTIPLE,
-	SINGLE
+	PARAMETERS_MULTIPLE,
+	PARAMETERS_SINGLE
 } ParametersType;
 
-struct Parameters {
+typedef struct Parameters {
 	ParametersType type;
-	Parameters *parameters;
-	DataType *type;
+	struct Parameters *parameters;
+	struct DataType *dataType;
 	char *identifier;
-};
+} Parameters;
 
 typedef enum {
-	ADDITION,
-	SUBTRACTION,
-	MULTIPLICATION,
-	DIVISION,
-	MODULO,
-	EXPONENTIATION,
-	EQUALITY,
-	INEQUALITY,
-	LESS_THAN,
-	LESS_THAN_OR_EQUAL,
-	GREATER_THAN,
-	GREATER_THAN_OR_EQUAL,
-	AND,
-	OR,
-	NOT,
-	FACTOR
+	EXPRESSION_ADDITION,
+	EXPRESSION_SUBTRACTION,
+	EXPRESSION_MULTIPLICATION,
+	EXPRESSION_DIVISION,
+	EXPRESSION_MODULO,
+	EXPRESSION_EXPONENTIATION,
+	EXPRESSION_EQUALITY,
+	EXPRESSION_INEQUALITY,
+	EXPRESSION_LESS_THAN,
+	EXPRESSION_LESS_THAN_OR_EQUAL,
+	EXPRESSION_GREATER_THAN,
+	EXPRESSION_GREATER_THAN_OR_EQUAL,
+	EXPRESSION_AND,
+	EXPRESSION_OR,
+	EXPRESSION_NOT,
+	EXPRESSION_FACTOR
 } ExpressionType;
 
-struct Expression {
+typedef struct Expression {
 	ExpressionType type;
-	Expression *leftExpression;
-	Expression *rightExpression;
-	Factor *factor;
-};
+	struct Expression *leftExpression;
+	struct Expression *rightExpression;
+	struct Factor *factor;
+} Expression;
 
 typedef enum {
-	EXPRESSION,
-	CONSTANT
+	FACTOR_EXPRESSION,
+	FACTOR_CONSTANT
 } FactorType;
 
-typedef struct {
+typedef struct Factor{
 	FactorType type;
-	Expression *expression;
-	Constant *constant;
+	struct Expression *expression;
+	struct Constant *constant;
 } Factor;
 
 typedef enum {
-	INTEGER,
-	VARIABLE,
-	ADDRESS,
-	BOOLEAN,
-	STRING,
-	SCIENTIFIC_NOTATION
+	CONSTANT_INTEGER,
+	CONSTANT_VARIABLE,
+	CONSTANT_ADDRESS,
+	CONSTANT_BOOLEAN,
+	CONSTANT_STRING,
+	CONSTANT_SCIENTIFIC_NOTATION
 } ConstantType;
 
-typedef struct {
+typedef struct Constant{
 	ConstantType type;
-	Assignable *variable;
+	struct Assignable *variable;
 	int value;
 	char *string;
 } Constant;
