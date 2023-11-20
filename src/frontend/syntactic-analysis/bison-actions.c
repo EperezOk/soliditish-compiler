@@ -178,10 +178,136 @@ Loop *LoopGrammarAction(LoopInitialization *loopInitialization, LoopCondition *l
 	return loop;	
 }
 
+LoopInitialization *LoopInitVarDefGrammarAction(VariableDefinition *variable) {
+	LoopInitialization *loopInitialization = calloc(1, sizeof(LoopInitialization));
+	loopInitialization->type = LOOP_INITIALIZATION_VARIABLE_DEFINITION;
+	loopInitialization->variable = variable;
+	return loopInitialization;
+}
 
-int InstructionsGrammarAction(int instructions, int instruction) {
-	LogDebug("[Bison] InstructionsGrammarAction(%d, %d)", instructions, instruction);
-	return 0;
+LoopInitialization *LoopInitAssignmentGrammarAction(Assignment *assignment) {
+	LoopInitialization *loopInitialization = calloc(1, sizeof(LoopInitialization));
+	loopInitialization->type = LOOP_INITIALIZATION_ASSIGNMENT;
+	loopInitialization->assignment = assignment;
+	return loopInitialization;
+}
+
+LoopInitialization *LoopInitMathAssignmentGrammarAction(MathAssignment *assignment) {
+	LoopInitialization *loopInitialization = calloc(1, sizeof(LoopInitialization));
+	loopInitialization->type = LOOP_INITIALIZATION_MATH_ASSIGNMENT;
+	loopInitialization->mathAssignment = assignment;
+	return loopInitialization;
+}
+
+LoopCondition *LoopConditionGrammarAction(Expression *condition) {
+	LoopCondition *loopCondition = calloc(1, sizeof(LoopCondition));
+	loopCondition->type = condition == NULL ? LOOP_CONDITION_EMPTY : LOOP_CONDITION_CONDITIONAL;
+	loopCondition->condition = condition;
+	return loopCondition;
+}
+
+LoopIteration *LoopIterationAssignmentGrammarAction(Assignment *assignment) {
+	LoopIteration *loopIteration = calloc(1, sizeof(LoopIteration));
+	loopIteration->type = assignment == NULL ? LOOP_ITERATION_EMPTY : LOOP_ITERATION_ASSIGNMENT;
+	loopIteration->assignment = assignment;
+	return loopIteration;
+}
+
+LoopIteration *LoopIterationMathAssignmentGrammarAction(MathAssignment *mathAssignment) {
+	LoopIteration *loopIteration = calloc(1, sizeof(LoopIteration));
+	loopIteration->type = LOOP_ITERATION_MATH_ASSIGNMENT;
+	loopIteration->mathAssignment = mathAssignment;
+	return loopIteration;
+}
+
+MathAssignment *IncDecGrammarAction(Assignable *variable, MathAssignmentType type) {
+	MathAssignment *mathAssignment = calloc(1, sizeof(MathAssignment));
+	mathAssignment->type = type;
+	mathAssignment->variable = variable;
+	return mathAssignment;
+}
+
+Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex) {
+	Assignable *assignable = calloc(1, sizeof(Assignable));
+	assignable->type = arrayIndex == NULL ? ASSIGNABLE_VARIABLE : ASSIGNABLE_ARRAY;
+	assignable->identifier = identifier;
+	assignable->arrayIndex = arrayIndex;
+	return assignable;
+}
+
+Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression *expression) {
+	Assignment *assignment = calloc(1, sizeof(Assignment));
+	assignment->type = ASSIGNMENT_EXPRESSION;
+	assignment->expression = expression;
+	return assignment;
+}
+
+Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements) {
+	Assignment *assignment = calloc(1, sizeof(Assignment));
+	assignment->type = ASSIGNMENT_ARRAY_INITIALIZATION;
+	assignment->arrayElements = arrayElements;
+	return assignment;
+}
+
+Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall) {
+	Assignment *assignment = calloc(1, sizeof(Assignment));
+	assignment->type = ASSIGNMENT_FUNCTION_CALL;
+	assignment->functionCall = functionCall;
+	return assignment;
+}
+
+MathAssignment *MathAssignmentGrammarAction(Assignable *variable, MathAssignmentOperator *operator, Expression *expression) {
+	MathAssignment *mathAssignment = calloc(1, sizeof(MathAssignment));
+	mathAssignment->type = MATH_ASSIGNMENT_OPERATOR;
+	mathAssignment->variable = variable;
+	mathAssignment->operator = operator;
+	mathAssignment->expression = expression;
+	return mathAssignment;
+}
+
+MathAssignmentOperator *MathAssignmentOperatorGrammarAction(MathAssignmentOperatorType type) {
+	MathAssignmentOperator *mathAssignmentOperator = calloc(1, sizeof(MathAssignmentOperator));
+	mathAssignmentOperator->type = type;
+	return mathAssignmentOperator;
+}
+
+FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) {
+	FunctionCall *functionCall = calloc(1, sizeof(FunctionCall));
+	functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+	functionCall->identifier = identifier;
+	functionCall->arguments = arguments;
+	return functionCall;
+}
+
+Arguments *ArgumentsGrammarAction(Arguments *arguments, Expression *expression) {
+	Arguments *args = calloc(1, sizeof(Arguments));
+	args->type = arguments == NULL ? ARGUMENTS_SINGLE : ARGUMENTS_MULTIPLE;
+	args->arguments = arguments;
+	args->expression = expression;
+	return args;
+}
+
+MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method) {
+	MemberCall *memberCall = calloc(1, sizeof(MemberCall));
+	memberCall->instance = instance;
+	memberCall->method = method;
+	return memberCall;
+}
+
+VariableDefinition *VariableInitializationGrammarAction(DataType *dataType, Assignment *assignment) {
+	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
+	variableDefinition->type = VARIABLE_DEFINITION_INITIALIZATION;
+	variableDefinition->dataType = dataType;
+	variableDefinition->assignment = assignment;
+	return variableDefinition;
+}
+
+VariableDefinition *VariableDeclarationGrammarAction(DataType *dataType, char *identifier) {
+	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
+	variableDefinition->type = VARIABLE_DEFINITION_DECLARATION;
+	variableDefinition->dataType = dataType;
+	variableDefinition->identifier = identifier;
+	return variableDefinition;
 }
 
 DataType *DataTypeSimpleGrammarAction(DataTypeType type) {
@@ -194,134 +320,70 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 	DataType *arrayDataType = calloc(1, sizeof(DataType));	
 	arrayDataType->type = expression == NULL ? DATA_TYPE_DYNAMIC_ARRAY : DATA_TYPE_STATIC_ARRAY;
 	arrayDataType->dataType = dataType;
+	arrayDataType->expression = expression;
 	return arrayDataType;
 }
 
-int EmptyInstructionGrammarAction() {
-	LogDebug("[Bison] EmptyInstructionsGrammarAction");
-	return 0;
+FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, ParameterDefinition *pd, FunctionBlock *fb) {
+	FunctionDefinition *functionDefinition = calloc(1, sizeof(FunctionDefinition));
+	functionDefinition->decorators = dec;
+	functionDefinition->parameterDefinition = pd;
+	functionDefinition->identifier = id;
+	functionDefinition->functionBlock = fb;
+	return functionDefinition;
 }
 
-int VariableDefinitionGrammarAction(int dataType, char *name, char *value) {
-	LogDebug("[Bison] VariableDefinitionGrammarAction(%d, %s, %s)", dataType, name, value);
-	return 0;
+Decorators *DecoratorsGrammarAction(char *decorator, Decorators *decorators) {
+	Decorators *dec = calloc(1, sizeof(Decorators));
+	dec->type = decorators == NULL ? DECORATORS_NO_DECORATORS : DECORATORS_WITH_DECORATORS;
+	dec->decorators = decorators;
+	dec->decorator = decorator;
+	return dec;
 }
 
-int FunctionInstructionGrammarAction() {
-	LogDebug("[Bison] FunctionInstructionGrammarAction");
-	return 0;
+ParameterDefinition *ParameterDefinitionGrammarAction(Parameters *parameters) {
+	ParameterDefinition *params = calloc(1, sizeof(ParameterDefinition));
+	params->type = parameters == NULL ? PARAMETERS_DEFINITION_NO_PARAMS : PARAMETERS_DEFINITION_WITH_PARAMS;
+	params->parameters = parameters;
+	return params;
 }
 
-int FunctionDefinitionGrammarAction(char *functionName) {
-	LogDebug("[Bison] FunctionDefinitionGrammarAction(%s)", functionName);
-	return 0;
+Parameters *ParametersGrammarAction(Parameters *parameters, DataType *dataType, char *identifier) {
+	Parameters *params = calloc(1, sizeof(Parameters));
+	params->type = parameters == NULL ? PARAMETERS_SINGLE : PARAMETERS_MULTIPLE;
+	params->parameters = parameters;
+	params->dataType = dataType;
+	params->identifier = identifier;
+	return params;
 }
 
-int EmptyArgumentListGrammarAction() {
-	LogDebug("[Bison] EmptyArgumentListGrammarAction");
-	return 0;
-}
-
-int ArgumentListGrammarAction() {
-	LogDebug("[Bison] ArgumentListGrammarAction");
-	return 0;
-}
-
-int ArgumentDefinitionGrammarAction() {
-	LogDebug("[Bison] ArgumentDefinitionGrammarAction");
-	return 0;
-}
-
-Expression *AdditionExpressionGrammarAction(Expression *leftExpression, Expression *rightExpression) {
+Expression *ExpressionGrammarAction(ExpressionType type, Expression *leftExpression, Expression *rightExpression) {
 	Expression *expression = calloc(1, sizeof(Expression));
-	expression->type = EXPRESSION_ADDITION;
+	expression->type = type;
 	expression->leftExpression = leftExpression;
 	expression->rightExpression = rightExpression;
 	return expression;
 }
 
-int SubtractionExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] SubtractionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Subtract(leftValue, rightValue);
+Expression *FactorExpressionGrammarAction(Factor *factor) {
+	Expression *expression = calloc(1, sizeof(Expression));
+	expression->type = EXPRESSION_FACTOR;
+	expression->factor = factor;
+	return expression;
 }
 
-int MultiplicationExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] MultiplicationExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Multiply(leftValue, rightValue);
+Factor *ExpressionFactorGrammarAction(Expression *expression) {
+	Factor *factor = calloc(1, sizeof(Factor));
+	factor->type = FACTOR_EXPRESSION;
+	factor->expression = expression;
+	return factor;
 }
 
-int DivisionExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] DivisionExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return Divide(leftValue, rightValue);
-}
-
-int ModuloExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] ModuloExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int ExponentiationExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] ExponentiationExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int EqualityExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] EqualityExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-int InequalityExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] InequalityExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int LessThanExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] LessThanExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int LessThanOrEqualExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] LessThanOrEqualExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int GreaterThanExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] GreaterThanExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int GreaterThanOrEqualExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] GreaterThanOrEqualExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int AndExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] AndExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int OrExpressionGrammarAction(int leftValue, int rightValue) {
-	LogDebug("[Bison] OrExpressionGrammarAction(%d, %d)", leftValue, rightValue);
-	return 0;
-}
-
-int NotExpressionGrammarAction(int value) {
-	LogDebug("[Bison] NotExpressionGrammarAction(%d)", value);
-	return 0;
-}
-
-int FactorExpressionGrammarAction(int value) {
-	LogDebug("[Bison] FactorExpressionGrammarAction(%d)", value);
-	return value;
-}
-
-int ExpressionFactorGrammarAction(int value) {
-	LogDebug("[Bison] ExpressionFactorGrammarAction(%d)", value);
-	return value;
-}
-
-int ConstantFactorGrammarAction(int value) {
-	LogDebug("[Bison] ConstantFactorGrammarAction(%d)", value);
-	return value;
+Factor *ConstantFactorGrammarAction(Constant *constant) {
+	Factor *factor = calloc(1, sizeof(Factor));
+	factor->type = FACTOR_CONSTANT;
+	factor->constant = constant;
+	return factor;
 }
 
 Constant *StringConstantGrammarAction(ConstantType type, char *str) {

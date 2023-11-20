@@ -205,54 +205,54 @@ loop: FOR OPEN_PARENTHESIS loop_initialization SEMI loop_condition
 		SEMI loop_iteration CLOSE_PARENTHESIS function_block					{ $$ = LoopGrammarAction($3, $5, $7, $9); }
 	;
 
-loop_initialization: variable_definition										{ $$ = 0; }
-	| assignment																{ $$ = 0; }
-	| math_assignment															{ $$ = 0; }
-	| %empty																	{ $$ = 0; }
+loop_initialization: variable_definition										{ $$ = LoopInitVarDefGrammarAction($1); }
+	| assignment																{ $$ = LoopInitAssignmentGrammarAction($1); }
+	| math_assignment															{ $$ = LoopInitMathAssignmentGrammarAction($1); }
+	| %empty																	{ $$ = LoopInitVarDefGrammarAction(NULL); }
 	;
 
-loop_condition: expression														{ $$ = 0; }
-	| %empty																	{ $$ = 0; }
+loop_condition: expression														{ $$ = LoopConditionGrammarAction($1); }
+	| %empty																	{ $$ = LoopConditionGrammarAction(NULL); }
 	;
 
-loop_iteration: assignment														{ $$ = 0; }
-	| math_assignment															{ $$ = 0; }
-	| %empty																	{ $$ = 0; }
+loop_iteration: assignment														{ $$ = LoopIterationAssignmentGrammarAction($1); }
+	| math_assignment															{ $$ = LoopIterationMathAssignmentGrammarAction($1); }
+	| %empty																	{ $$ = LoopIterationAssignmentGrammarAction(NULL); }
 	;
 
-assignable: IDENTIFIER															{ $$ = 0; }
-	| IDENTIFIER OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET			{ $$ = 0; }
+assignable: IDENTIFIER															{ $$ = AssignableGrammarAction($1, NULL); }
+	| IDENTIFIER OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET			{ $$ = AssignableGrammarAction($1, $3); }
 
-assignment: assignable EQ expression											{ $$ = 0; /*VariableDefinitionGrammarAction($1, $2, $4);*/ }
-	| assignable EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET			{ $$ = 0; }
-	| assignable EQ function_call												{ $$ = 0; }
+assignment: assignable EQ expression											{ $$ = AssignmentExpressionGrammarAction($1, $3); }
+	| assignable EQ OPEN_SQUARE_BRACKET arguments CLOSE_SQUARE_BRACKET			{ $$ = AssignmentArrayInitGrammarAction($1, $4); }
+	| assignable EQ function_call												{ $$ = AssignmentFunctionCallGrammarAction($1, $3); }
 	;
 
-math_assignment: assignable math_assignment_operator expression					{ $$ = 0; }
-	| assignable INC 															{ $$ = 0; }
-	| assignable DEC															{ $$ = 0; }
+math_assignment: assignable math_assignment_operator expression					{ $$ = MathAssignmentGrammarAction($1, $2, $3); }
+	| assignable INC 															{ $$ = IncDecGrammarAction($1, MATH_ASSIGNMENT_INCREMENT); }
+	| assignable DEC															{ $$ = IncDecGrammarAction($1, MATH_ASSIGNMENT_DECREMENT); }
 	;
 
-math_assignment_operator: ADD_EQ												{ $$ = 0; }
-	| SUB_EQ																	{ $$ = 0; }
-	| MUL_EQ																	{ $$ = 0; }
-	| DIV_EQ																	{ $$ = 0; }
-	| MOD_EQ																	{ $$ = 0; }
+math_assignment_operator: ADD_EQ												{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_ADD_EQUAL); }
+	| SUB_EQ																	{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_SUBTRACT_EQUAL); }
+	| MUL_EQ																	{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_MULTIPLY_EQUAL); }
+	| DIV_EQ																	{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_DIVIDE_EQUAL); }
+	| MOD_EQ																	{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_MODULO_EQUAL); }
 	;
 
-function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = 0; }
-	| IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS					{ $$ = 0; }
+function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = FunctionCallGrammarAction($1, NULL); }
+	| IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS					{ $$ = FunctionCallGrammarAction($1, $3); }
 	;
 
-arguments: arguments COMMA expression											{ $$ = 0; }
-	| expression																{ $$ = 0; }
+arguments: arguments COMMA expression											{ $$ = ArgumentsGrammarAction($1, $3); }
+	| expression																{ $$ = ArgumentsGrammarAction(NULL, $1); }
 	;
 
-member_call: assignable DOT function_call										{ $$ = 0; }
+member_call: assignable DOT function_call										{ $$ = MemberCallGrammarAction($1, $3); }
 	;
 
-variable_definition: data_type IDENTIFIER										{ $$ = 0; }
-	| data_type assignment														{ $$ = 0; }
+variable_definition: data_type IDENTIFIER										{ $$ = VariableDeclarationGrammarAction($1, $2); }
+	| data_type assignment														{ $$ = VariableInitializationGrammarAction($1, $2); }
 	;
 
 data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC20); }
@@ -268,36 +268,36 @@ data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_E
 	;
 
 function_definition: decorators 
-		FUNCTION IDENTIFIER parameter_definition function_block					{ $$ = FunctionDefinitionGrammarAction($3); }
+		FUNCTION IDENTIFIER parameter_definition function_block					{ $$ = FunctionDefinitionGrammarAction($1, $3, $4, $5); }
 	;
 
-decorators: DECORATOR decorators												{ $$ = DecoratorGrammarAction($1); }
-	| %empty																	{ $$ = 0; }
+decorators: DECORATOR decorators												{ $$ = DecoratorsGrammarAction($1, $2); }
+	| %empty																	{ $$ = DecoratorsGrammarAction(NULL, NULL); }
 	;
 
-parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS						{ $$ = EmptyArgumentListGrammarAction(); }
-	| OPEN_PARENTHESIS parameters CLOSE_PARENTHESIS								{ $$ = ArgumentListGrammarAction(); }
+parameter_definition: OPEN_PARENTHESIS CLOSE_PARENTHESIS						{ $$ = ParameterDefinitionGrammarAction(NULL); }
+	| OPEN_PARENTHESIS parameters CLOSE_PARENTHESIS								{ $$ = ParameterDefinitionGrammarAction($2); }
 	;
 
-parameters: parameters COMMA data_type IDENTIFIER								{ $$ = ArgumentDefinitionGrammarAction(); }
-	| data_type IDENTIFIER														{ $$ = ArgumentDefinitionGrammarAction(); }
+parameters: parameters COMMA data_type IDENTIFIER								{ $$ = ParametersGrammarAction($1, $3, $4); }
+	| data_type IDENTIFIER														{ $$ = ParametersGrammarAction(NULL, $1, $2); }
 	;
 
-expression: expression[left] ADD expression[right]								{ $$ = AdditionExpressionGrammarAction($left, $right); }
-	| expression[left] SUB expression[right]									{ $$ = SubtractionExpressionGrammarAction($left, $right); }
-	| expression[left] MUL expression[right]									{ $$ = MultiplicationExpressionGrammarAction($left, $right); }
-	| expression[left] DIV expression[right]									{ $$ = DivisionExpressionGrammarAction($left, $right); }
-	| expression[left] MOD expression[right]									{ $$ = ModuloExpressionGrammarAction($left, $right); }
-	| expression[left] EXP expression[right]									{ $$ = ExponentiationExpressionGrammarAction($left, $right); }
-	| expression[left] IS_EQ expression[right]									{ $$ = EqualityExpressionGrammarAction($left, $right); }
-	| expression[left] NEQ expression[right]									{ $$ = InequalityExpressionGrammarAction($left, $right); }
-	| expression[left] LT expression[right]										{ $$ = LessThanExpressionGrammarAction($left, $right); }
-	| expression[left] LTE expression[right]									{ $$ = LessThanOrEqualExpressionGrammarAction($left, $right); }
-	| expression[left] GT expression[right]										{ $$ = GreaterThanExpressionGrammarAction($left, $right); }
-	| expression[left] GTE expression[right]									{ $$ = GreaterThanOrEqualExpressionGrammarAction($left, $right); }
-	| expression[left] AND expression[right]									{ $$ = AndExpressionGrammarAction($left, $right); }
-	| expression[left] OR expression[right]										{ $$ = OrExpressionGrammarAction($left, $right); }
-	| NOT expression															{ $$ = NotExpressionGrammarAction($2); }
+expression: expression[left] ADD expression[right]								{ $$ = ExpressionGrammarAction(EXPRESSION_ADDITION, $left, $right); }
+	| expression[left] SUB expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_SUBTRACTION, $left, $right); }
+	| expression[left] MUL expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_MULTIPLICATION, $left, $right); }
+	| expression[left] DIV expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_DIVISION, $left, $right); }
+	| expression[left] MOD expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_MODULO, $left, $right); }
+	| expression[left] EXP expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EXPONENTIATION, $left, $right); }
+	| expression[left] IS_EQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EQUALITY, $left, $right); }
+	| expression[left] NEQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_INEQUALITY, $left, $right); }
+	| expression[left] LT expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN, $left, $right); }
+	| expression[left] LTE expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN_OR_EQUAL, $left, $right); }
+	| expression[left] GT expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_GREATER_THAN, $left, $right); }
+	| expression[left] GTE expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_GREATER_THAN_OR_EQUAL, $left, $right); }
+	| expression[left] AND expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_AND, $left, $right); }
+	| expression[left] OR expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_OR, $left, $right); }
+	| NOT expression															{ $$ = ExpressionGrammarAction(EXPRESSION_NOT, $2, NULL); }
 	| factor																	{ $$ = FactorExpressionGrammarAction($1); }
 	;
 
@@ -305,12 +305,12 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS							{ $$ = ExpressionFac
 	| constant																	{ $$ = ConstantFactorGrammarAction($1); }
 	;
 
-constant: INTEGER																{ $$ = IntegerConstantGrammarAction(INTEGER, $1); }
+constant: INTEGER																{ $$ = IntegerConstantGrammarAction(CONSTANT_INTEGER, $1); }
 	| assignable																{ $$ = AssignableConstantGrammarAction($1); }
-	| ADDRESS																	{ $$ = StringConstantGrammarAction(ADDRESS, $1); }
-	| BOOLEAN																	{ $$ = IntegerConstantGrammarAction(BOOLEAN, $1); }
-	| STRING																	{ $$ = StringConstantGrammarAction(STRING, $1); }
-	| SCIENTIFIC_NOTATION														{ $$ = StringConstantGrammarAction(SCIENTIFIC_NOTATION, $1); }
+	| ADDRESS																	{ $$ = StringConstantGrammarAction(CONSTANT_ADDRESS, $1); }
+	| BOOLEAN																	{ $$ = IntegerConstantGrammarAction(CONSTANT_BOOLEAN, $1); }
+	| STRING																	{ $$ = StringConstantGrammarAction(CONSTANT_STRING, $1); }
+	| SCIENTIFIC_NOTATION														{ $$ = StringConstantGrammarAction(CONSTANT_SCIENTIFIC_NOTATION, $1); }
 	;
 
 %%

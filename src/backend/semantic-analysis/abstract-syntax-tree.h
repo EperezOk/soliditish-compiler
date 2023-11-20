@@ -1,12 +1,6 @@
 #ifndef ABSTRACT_SYNTAX_TREE_HEADER
 #define ABSTRACT_SYNTAX_TREE_HEADER
 
-/**
-* Se realiza este tipo de definiciones cuando el tipo de dato debe
-* auto-referenciarse, como es el caso de una "Expression", que está compuesta
-* de otras 2 expresiones.
-*/
-
 typedef struct Program{
 	struct ContractDefinition *contract;
 } Program;
@@ -147,7 +141,7 @@ typedef enum {
 
 typedef struct Assignable{
 	AssignableType type;
-	struct Expression *expression;
+	struct Expression *arrayIndex;
 	char *identifier;
 } Assignable;
 
@@ -161,7 +155,7 @@ typedef struct Assignment{
 	AssignmentType type;
 	struct Assignable *assignable;
 	struct Expression *expression;
-	struct Arguments *arrayIndex;
+	struct Arguments *arrayElements;
 	struct FunctionCall *functionCall;
 } Assignment;
 
@@ -173,7 +167,7 @@ typedef enum {
 
 typedef struct MathAssignment{
 	MathAssignmentType type;
-	struct Assignable *assignable;
+	struct Assignable *variable;
 	struct MathAssignmentOperator *operator;
 	struct Expression *expression;
 } MathAssignment;
@@ -213,13 +207,13 @@ typedef struct Arguments {
 } Arguments;
 
 typedef struct MemberCall{
-	struct Assignable *assignable;
+	struct Assignable *instance;
 	struct FunctionCall *method;
 } MemberCall;
 
 typedef enum VariableDefinitionType{
-	VARIABLE_DEFINITION_NOT_INITIALIZED,
-	VARIABLE_DEFINITION_INITIALIZED
+	VARIABLE_DEFINITION_DECLARATION,
+	VARIABLE_DEFINITION_INITIALIZATION
 } VariableDefinitionType;
 
 typedef struct VariableDefinition{
@@ -260,16 +254,10 @@ typedef enum {
 	DECORATORS_NO_DECORATORS
 } DecoratorsType;
 
-typedef enum {
-	DECORATORS_PUBLIC,
-	DECORATORS_PRIVATE,
-	DECORATORS_REENTRANT
-} DecoratorsValue;
-
 typedef struct Decorators {
 	DecoratorsType type;
 	struct Decorators *decorators;
-	DecoratorsValue decorator;
+	char *decorator;
 } Decorators;
 
 typedef enum {
@@ -325,7 +313,7 @@ typedef enum {
 	FACTOR_CONSTANT
 } FactorType;
 
-typedef struct Factor{
+typedef struct Factor {
 	FactorType type;
 	struct Expression *expression;
 	struct Constant *constant;

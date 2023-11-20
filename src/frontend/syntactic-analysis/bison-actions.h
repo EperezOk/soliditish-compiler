@@ -11,71 +11,76 @@
  * abstracta (i.e., el AST).
  */
 
-// Programa.
 Program *ProgramGrammarAction(ContractDefinition *contract);
 
-// Expresión.
-ContractDefinition *ContractDefinitionGrammarAction(char *identifier, struct ContractBlock *block);
-ContractBlock *ContractBlockGrammarAction(struct ContractInstructions *instructions);
-FunctionBlock *FunctionBlockGrammarAction(struct FunctionInstructions *instructions);
-Conditional *ConditionalGrammarAction(struct Expression *condition, struct FunctionBlock *ifBlock, struct FunctionBlock *elseBlock);
-ContractInstructions *ContractInstructionsGrammarAction(struct ContractInstructions *instructions, struct ContractInstruction *instruction);
+ContractDefinition *ContractDefinitionGrammarAction(char *identifier, ContractBlock *block);
+ContractBlock *ContractBlockGrammarAction(ContractInstructions *instructions);
+FunctionBlock *FunctionBlockGrammarAction(FunctionInstructions *instructions);
+Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBlock, FunctionBlock *elseBlock);
+ContractInstructions *ContractInstructionsGrammarAction(ContractInstructions *instructions, ContractInstruction *instruction);
 
-ContractInstruction *StateVariableContractInstructionGrammarAction(struct Decorators *variableDecorators, struct VariableDefinition *variableDefinition);
-ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(struct FunctionDefinition *functionDefinition);
-ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, struct ParameterDefinition *eventParams);
+ContractInstruction *StateVariableContractInstructionGrammarAction(Decorators *variableDecorators, VariableDefinition *variableDefinition);
+ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(FunctionDefinition *functionDefinition);
+ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, ParameterDefinition *eventParams);
 
-FunctionInstructions *FunctionInstructionsGrammarAction(struct FunctionInstructions *instructions, struct FunctionInstruction *instruction);
+FunctionInstructions *FunctionInstructionsGrammarAction(FunctionInstructions *instructions, FunctionInstruction *instruction);
 
-FunctionInstruction *VariableDefinitionFunctionInstructionGrammarAction(struct VariableDefinition *variableDefinition);
-FunctionInstruction *ConditionalFunctionInstructionGrammarAction(struct Conditional *conditional);
-FunctionInstruction *FunctionCallFunctionInstructionGrammarAction(struct FunctionCall *functionCall);
-FunctionInstruction *MemberCallFunctionInstructionGrammarAction(struct MemberCall *memberCall);
-FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, struct Arguments *eventArgs);
-FunctionInstruction *AssignmentFunctionInstructionGrammarAction(struct Assignment *assignment);
-FunctionInstruction *MathAssignmentFunctionInstructionGrammarAction(struct MathAssignment *mathAssignment);
-FunctionInstruction *LoopFunctionInstructionGrammarAction(struct Loop *loop);
+FunctionInstruction *VariableDefinitionFunctionInstructionGrammarAction(VariableDefinition *variableDefinition);
+FunctionInstruction *ConditionalFunctionInstructionGrammarAction(Conditional *conditional);
+FunctionInstruction *FunctionCallFunctionInstructionGrammarAction(FunctionCall *functionCall);
+FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memberCall);
+FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs);
+FunctionInstruction *AssignmentFunctionInstructionGrammarAction(Assignment *assignment);
+FunctionInstruction *MathAssignmentFunctionInstructionGrammarAction(MathAssignment *mathAssignment);
+FunctionInstruction *LoopFunctionInstructionGrammarAction(Loop *loop);
 
-Loop * LoopGrammarAction(struct LoopInitialization *loopInitialization, struct LoopCondition *loopCondition, struct LoopIteration *loopIteration, struct FunctionBlock *functionBlock);
+Loop * LoopGrammarAction(LoopInitialization *loopInitialization, LoopCondition *loopCondition, LoopIteration *loopIteration, FunctionBlock *functionBlock);
 
+LoopInitialization *LoopInitVarDefGrammarAction(VariableDefinition *variable);
+LoopInitialization *LoopInitAssignmentGrammarAction(Assignment *assignment);
+LoopInitialization *LoopInitMathAssignmentGrammarAction(MathAssignment *assignment);
 
-int InstructionsGrammarAction(int instructions, int instruction);
-int VariableDefinitionGrammarAction(int dataType, char *name, char *value);
-int FunctionInstructionGrammarAction();
-int FunctionDefinitionGrammarAction(char *functionName);
+LoopCondition *LoopConditionGrammarAction(Expression *expression);
 
-int EmptyArgumentListGrammarAction();
-int ArgumentListGrammarAction();
-int ArgumentDefinitionGrammarAction();
+LoopIteration *LoopIterationAssignmentGrammarAction(Assignment *assignment);
+LoopIteration *LoopIterationMathAssignmentGrammarAction(MathAssignment *mathAssignment);
 
-// Instruction
+Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex);
+
+Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression *expression);
+Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements);
+Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall);
+
+MathAssignment *MathAssignmentGrammarAction(Assignable *variable, MathAssignmentOperator *operator, Expression *expression);
+MathAssignment *IncDecGrammarAction(Assignable *variable, MathAssignmentType type);
+
+MathAssignmentOperator *MathAssignmentOperatorGrammarAction(MathAssignmentOperatorType type);
+
+FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments);
+
+Arguments *ArgumentsGrammarAction(Arguments *arguments, Expression *expression);
+
+MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method);
+
+VariableDefinition *VariableInitializationGrammarAction(DataType *dataType, Assignment *assignment);
+VariableDefinition *VariableDeclarationGrammarAction(DataType *dataType, char *identifier);
+
 DataType *DataTypeSimpleGrammarAction(DataTypeType dataTypeType);
-DataType *DataTypeArrayGrammarAction(struct DataType *dataType, struct Expression *expression);
+DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression);
 
-int EmptyInstructionGrammarAction();
+FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, ParameterDefinition *pd, FunctionBlock *fb);
 
-Expression *AdditionExpressionGrammarAction(Expression *leftExpression, Expression *rightExpression);
-int SubtractionExpressionGrammarAction(int leftValue, int rightValue);
-int MultiplicationExpressionGrammarAction(int leftValue, int rightValue);
-int DivisionExpressionGrammarAction(int leftValue, int rightValue);
-int ModuloExpressionGrammarAction(int leftValue, int rightValue);
-int ExponentiationExpressionGrammarAction(int leftValue, int rightValue);
-int EqualityExpressionGrammarAction(int leftValue, int rightValue);
-int InequalityExpressionGrammarAction(int leftValue, int rightValue);
-int LessThanExpressionGrammarAction(int leftValue, int rightValue);
-int LessThanOrEqualExpressionGrammarAction(int leftValue, int rightValue);
-int GreaterThanExpressionGrammarAction(int leftValue, int rightValue);
-int GreaterThanOrEqualExpressionGrammarAction(int leftValue, int rightValue);
-int AndExpressionGrammarAction(int leftValue, int rightValue);
-int OrExpressionGrammarAction(int leftValue, int rightValue);
-int NotExpressionGrammarAction(int value);
-int FactorExpressionGrammarAction(int value);
+Decorators *DecoratorsGrammarAction(char *decorator, Decorators *decorators);
 
-// Factores.
-int ExpressionFactorGrammarAction(int value);
-int ConstantFactorGrammarAction(int value);
+ParameterDefinition *ParameterDefinitionGrammarAction(Parameters *parameters);
+Parameters *ParametersGrammarAction(Parameters *parameters, DataType *dataType, char *identifier);
 
-// Constantes.
+Expression *ExpressionGrammarAction(ExpressionType type, Expression *leftExpression, Expression *rightExpression);
+Expression *FactorExpressionGrammarAction(Factor *factor);
+
+Factor *ExpressionFactorGrammarAction(Expression *expression);
+Factor *ConstantFactorGrammarAction(Constant *constant);
+
 Constant *StringConstantGrammarAction(ConstantType type, char *str);
 Constant *IntegerConstantGrammarAction(ConstantType type, int value);
 Constant *AssignableConstantGrammarAction(Assignable *variable);
