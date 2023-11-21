@@ -11,40 +11,18 @@ FILE *outputFile = NULL;
 int indentationLevel = 0;
 int indentationSize = 4;
 boolean indentUsingSpaces = true;
+boolean indentNextOutput = false;
 boolean indent = false;
-
-static void output(const char *format, ...) {
-	va_list args;
-	va_start(args, format);
-
-	// Adjust indentation level
-	if (format[0] == '}') --indentationLevel;
-	else if (format[0] == '{') ++indentationLevel;
-
-	// Add indentation
-	if (indent) {
-		for (int i = 0; i < indentationLevel; ++i) {
-			for (int j = 0; j < indentationSize; ++j) {
-				fprintf(outputFile, "%s", indentUsingSpaces ? " " : "\t");
-			}
-		}
-	}
-
-	vfprintf(outputFile, format, args);
-
-	// Indent next line
-	if (format[strlen(format) - 1] == '\n') indent = true;
-	else indent = false;
-
-	va_end(args);
-}
 
 static void generateProgram(Program *program);
 static void generateContractInstructions(ContractInstructions *instructions);
 static void generateContractInstruction(ContractInstruction *instruction);
-static void generateDecorators(Decorators *decorators);
-static void generateVariableDefinition(VariableDefinition *definition);
+static void generateVariableDefinition(Decorators *decorators, VariableDefinition *definition);
+static void generateFunctionCall(FunctionCall *functionCall);
 static void generateFunctionDefinition(FunctionDefinition *definition);
+static void generateFunctionBlock(FunctionBlock *block);
+static void generateFunctionInstructions(FunctionInstructions *instructions);
+static void generateFunctionInstruction(FunctionInstruction *instruction);
 static void generateParameterDefinition(ParameterDefinition *definition);
 static void generateParameters(Parameters *params);
 static void generateDataType(DataType *dataType);
@@ -52,18 +30,52 @@ static void generateExpression(Expression *expression);
 static void generateFactor(Factor *factor);
 static void generateConstant(Constant *constant);
 static void generateAssignable(Assignable *assignable);
+static void generateArguments(Arguments *arguments);
+static void generateConditional(Conditional *conditional);
+static void generateMemberCall(MemberCall *memberCall);
 
-void Generator(FILE *out, int indentSize, boolean indentSpaces) {
+void Generator(FILE *out, int indentSize, boolean indentSpaces, boolean indentOutput) {
 	LogInfo("Generating output...");
 	outputFile = out;
 	indentationSize = indentSize;
 	indentUsingSpaces = indentSpaces;
+	indent = indentOutput;
 	generateProgram(state.program);
+}
+
+void applyIndentation(char firstChar, char lastChar) {
+	// Adjust indentation level
+	if (firstChar == '}') --indentationLevel;
+	else if (firstChar == '{') ++indentationLevel;
+
+	// Add indentation
+	if (indentNextOutput) {
+		for (int i = 0; i < indentationLevel; ++i) {
+			for (int j = 0; j < indentationSize; ++j) {
+				fprintf(outputFile, "%s", indentUsingSpaces ? " " : "\t");
+			}
+		}
+	}
+
+	// Indent next line
+	if (lastChar == '\n') indentNextOutput = true;
+	else indentNextOutput = false;
+}
+
+static void output(const char *format, ...) {
+	va_list args;
+	va_start(args, format);
+
+	if (indent) applyIndentation(format[0], format[strlen(format) - 1]);
+
+	vfprintf(outputFile, format, args);
+
+	va_end(args);
 }
 
 static void generateProgram(Program *program) {
 	output("contract %s ", program->contract->identifier);
-	output("{\n");
+	output("{");
 	generateContractInstructions(program->contract->block->instructions);
 	output("}\n");
 }
@@ -71,6 +83,7 @@ static void generateProgram(Program *program) {
 static void generateContractInstructions(ContractInstructions *instructions) {
 	if (instructions->type == CONTRACT_INSTRUCTIONS_MULTIPLE) {
 		generateContractInstructions(instructions->instructions);
+		output("\n");
 		generateContractInstruction(instructions->instruction);
 	}
 	// else: CONTRACT_INSTRUCTIONS_EMPTY, do nothing
@@ -79,8 +92,7 @@ static void generateContractInstructions(ContractInstructions *instructions) {
 static void generateContractInstruction(ContractInstruction *instruction) {
 	switch (instruction->type) {
 		case STATE_VARIABLE_DECLARATION:
-			generateDecorators(instruction->variableDecorators);
-			generateVariableDefinition(instruction->variableDefinition);
+			generateVariableDefinition(instruction->variableDecorators, instruction->variableDefinition);
 			break;
 		case FUNCTION_DECLARATION:
 			generateFunctionDefinition(instruction->functionDefinition);
@@ -93,16 +105,63 @@ static void generateContractInstruction(ContractInstruction *instruction) {
 	}
 }
 
-static void generateDecorators(Decorators *decorators) {
+static void generateVariableDefinition(Decorators *decorators, VariableDefinition *definition) {
+	generateDataType(definition->dataType);
 
+	// State variables will be internal by default, if not specified otherwise with a decorator
+	while (decorators != NULL && decorators->decorator != NULL) {
+		output(" %s", decorators->decorator);
+		decorators = decorators->decorators;
+	}
+
+	output(" %s", definition->identifier);
+
+	if (definition->type != VARIABLE_DEFINITION_DECLARATION)
+		output(" = ");
+	
+	switch(definition->type) {
+		case VARIABLE_DEFINITION_INIT_EXPRESSION:
+			generateExpression(definition->expression);
+			break;
+		case VARIABLE_DEFINITION_INIT_FUNCTION_CALL:
+			generateFunctionCall(definition->functionCall);
+			break;
+	}
+
+	output(";\n");
 }
 
-static void generateVariableDefinition(VariableDefinition *definition) {
-
+static void generateFunctionCall(FunctionCall *functionCall) {
+	output("%s(", functionCall->identifier);
+	if (functionCall->type == FUNCTION_CALL_WITH_ARGS)
+		generateArguments(functionCall->arguments);
+	output(")");
 }
 
-static void generateFunctionDefinition(FunctionDefinition *definition) {
+static void generateArguments(Arguments *arguments) {
+	if (arguments->type == ARGUMENTS_MULTIPLE) {
+		generateArguments(arguments->arguments);
+		output(", ");
+	}
+	generateExpression(arguments->expression);
+}
 
+static void generateFunctionDefinition(FunctionDefinition *function) {
+	output("function %s", function->identifier);
+	generateParameterDefinition(function->parameterDefinition);
+
+	Decorators *decorators = function->decorators;
+	if (decorators->decorator == NULL) {
+		// If no decorator is specified, the function will be internal by default
+		output(" internal");
+	}
+	while (decorators->decorator != NULL) {
+		output(" %s", decorators->decorator);
+		decorators = decorators->decorators;
+	}
+
+	output(" ");
+	generateFunctionBlock(function->functionBlock);
 }
 
 static void generateParameterDefinition(ParameterDefinition *definition) {
@@ -112,6 +171,62 @@ static void generateParameterDefinition(ParameterDefinition *definition) {
 		generateParameters(definition->parameters);
 
 	output(")");
+}
+
+static void generateFunctionBlock(FunctionBlock *block) {
+	output("{\n");
+	generateFunctionInstructions(block->instructions);
+	output("}\n");
+}
+
+static void generateFunctionInstructions(FunctionInstructions *instructions) {
+	if (instructions->type == FUNCTION_INSTRUCTIONS_MULTIPLE) {
+		generateFunctionInstructions(instructions->instructions);
+		generateFunctionInstruction(instructions->instruction);
+	}
+	// else: FUNCTION_INSTRUCTIONS_EMPTY, do nothing
+}
+
+static void generateFunctionInstruction(FunctionInstruction *instruction) {
+	switch (instruction->type) {
+		case FUNCTION_INSTRUCTION_VARIABLE_DEFINITION:
+			generateVariableDefinition(NULL, instruction->variableDefinition);
+			break;
+		case FUNCTION_INSTRUCTION_CONDITIONAL:
+			generateConditional(instruction->conditional);
+			break;
+		case FUNCTION_INSTRUCTION_FUNCTION_CALL:
+			generateFunctionCall(instruction->functionCall);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_MEMBER_CALL:
+			generateMemberCall(instruction->memberCall);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_EMIT_EVENT:
+			output("emit %s", instruction->eventIdentifier);
+			generateArguments(instruction->eventArgs);
+			output(";\n");
+			break;
+		// TODO: complete
+	}
+}
+
+static void generateConditional(Conditional *conditional) {
+	output("if (");
+	generateExpression(conditional->condition);
+	output(") ");
+	generateFunctionBlock(conditional->ifBlock);
+	if (conditional->type == CONDITIONAL_WITH_ELSE) {
+		output("else ");
+		generateFunctionBlock(conditional->elseBlock);
+	}
+}
+
+static void generateMemberCall(MemberCall *memberCall) {
+	generateAssignable(memberCall->instance);
+	output(".");
+	generateFunctionCall(memberCall->method);
 }
 
 static void generateParameters(Parameters *params) {

@@ -34,6 +34,11 @@ token StringValuePatternAction(const char *lexeme, const int length, token token
 	return token;
 }
 
+token DecoratorPatternAction(const char *lexeme, const int length) {
+	yylval.string = strndup(lexeme + 1, length - 1); // ignore leading '@'
+	return DECORATOR;
+}
+
 token BooleanPatternAction(const char *lexeme, const int length) {
 	char *lexemeCopy = strndup(lexeme, length);
 	yylval.integer = strncmp(lexemeCopy, "true", length) == 0; // 1 = true, 0 = false

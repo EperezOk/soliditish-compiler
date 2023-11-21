@@ -30,7 +30,7 @@ const int main(const int argumentCount, const char ** arguments) {
 			if (state.succeed) {
 				LogInfo("Compilation successful.");
 				// TODO: tomar estos parámetros de la línea de comandos
-				Generator(stdout, 4, true);
+				Generator(stdout, 4, true, true);
 			}
 			else {
 				LogError("Found %d compilation errors:", state.errorCount);

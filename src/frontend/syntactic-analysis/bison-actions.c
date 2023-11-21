@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../backend/domain-specific/calculator.h"
+#include "../../backend/domain-specific/builtins.h"
 #include "../../backend/semantic-analysis/symbol-table.h"
 #include "../../backend/support/logger.h"
 #include "bison-actions.h"
@@ -81,7 +81,7 @@ FunctionBlock *FunctionBlockGrammarAction(FunctionInstructions *instructions) {
 
 Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBlock, FunctionBlock *elseBlock) {
 	Conditional *conditional = calloc(1, sizeof(Conditional));
-	conditional->type = elseBlock == NULL ? NO_ELSE : WITH_ELSE;
+	conditional->type = elseBlock == NULL ? CONDITIONAL_NO_ELSE : CONDITIONAL_WITH_ELSE;
 	conditional->condition = condition;
 	conditional->ifBlock = ifBlock;
 	conditional->elseBlock = elseBlock;
@@ -298,7 +298,7 @@ MathAssignmentOperator *MathAssignmentOperatorGrammarAction(MathAssignmentOperat
 }
 
 FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) {
-	if (!symbolExists(identifier))
+	if (!symbolExists(identifier) && !isBuiltInFunction(identifier))
 		addError(sprintf(ERR_MSG, "Function `%s` does not exist", identifier));
 
 	FunctionCall *functionCall = calloc(1, sizeof(FunctionCall));
@@ -330,8 +330,9 @@ VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char 
 		insertSymbol(identifier);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
-	variableDefinition->type = VARIABLE_DEFINITION_INITIALIZATION;
+	variableDefinition->type = VARIABLE_DEFINITION_INIT_EXPRESSION;
 	variableDefinition->dataType = dataType;
+	variableDefinition->identifier = identifier;
 	variableDefinition->expression = expression;
 	return variableDefinition;
 }
@@ -343,8 +344,9 @@ VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, cha
 		insertSymbol(identifier);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
-	variableDefinition->type = VARIABLE_DEFINITION_INITIALIZATION;
+	variableDefinition->type = VARIABLE_DEFINITION_INIT_FUNCTION_CALL;
 	variableDefinition->dataType = dataType;
+	variableDefinition->identifier = identifier;
 	variableDefinition->functionCall = functionCall;
 	return variableDefinition;
 }
@@ -379,6 +381,8 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, ParameterDefinition *pd, FunctionBlock *fb) {
 	if (symbolExists(id))
 		addError(sprintf(ERR_MSG, "`%s` already exists", id));
+	else if (isBuiltInFunction(id))
+		addError(sprintf(ERR_MSG, "Cannot redeclare built-in function `%s`", id));
 	else
 		insertSymbol(id);
 

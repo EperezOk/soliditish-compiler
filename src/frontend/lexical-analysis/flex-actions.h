@@ -29,7 +29,7 @@ token StringValuePatternAction(const char *lexeme, const int length, token token
 
 token IntegerPatternAction(const char *lexeme, const int length);
 
-token ScientificPatternAction(const char *lexeme, const int length);
+token DecoratorPatternAction(const char *lexeme, const int length);
 
 // Patrón desconocido, permite abortar debido a un error de sintaxis.
 token UnknownPatternAction(const char *lexeme, const int length);

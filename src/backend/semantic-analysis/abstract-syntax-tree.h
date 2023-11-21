@@ -19,8 +19,8 @@ typedef struct FunctionBlock{
 } FunctionBlock;
 
 typedef enum {
-	NO_ELSE,
-	WITH_ELSE,
+	CONDITIONAL_NO_ELSE,
+	CONDITIONAL_WITH_ELSE,
 } ConditionalType;
 
 typedef struct Conditional{
@@ -213,7 +213,8 @@ typedef struct MemberCall{
 
 typedef enum VariableDefinitionType{
 	VARIABLE_DEFINITION_DECLARATION,
-	VARIABLE_DEFINITION_INITIALIZATION
+	VARIABLE_DEFINITION_INIT_EXPRESSION,
+	VARIABLE_DEFINITION_INIT_FUNCTION_CALL,
 } VariableDefinitionType;
 
 typedef struct VariableDefinition{
