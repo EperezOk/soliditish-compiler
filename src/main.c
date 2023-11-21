@@ -29,15 +29,16 @@ const int main(const int argumentCount, const char ** arguments) {
 			// inicial de la gramática satisfactoriamente.
 			if (state.succeed) {
 				LogInfo("Compilation successful.");
-				Generator(1);
+				// TODO: tomar estos parámetros de la línea de comandos
+				Generator(stdout, 4, true);
 			}
 			else {
 				LogError("Found %d compilation errors:", state.errorCount);
-				freeSymbolTable();
 				for (int i = 0; i < state.errorCount; ++i) {
-					LogError("%s", state.errors[i]);
+					LogErrorRaw("%s\n", state.errors[i]);
 					free(state.errors[i]);
 				}
+				freeSymbolTable();
 				return -1;
 			}
 			break;

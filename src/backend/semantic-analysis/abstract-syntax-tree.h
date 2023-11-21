@@ -304,8 +304,8 @@ typedef enum {
 
 typedef struct Expression {
 	ExpressionType type;
-	struct Expression *leftExpression;
-	struct Expression *rightExpression;
+	struct Expression *left;
+	struct Expression *right;
 	struct Factor *factor;
 } Expression;
 
@@ -323,9 +323,9 @@ typedef struct Factor {
 typedef enum {
 	CONSTANT_INTEGER,
 	CONSTANT_VARIABLE,
-	CONSTANT_ADDRESS,
 	CONSTANT_BOOLEAN,
 	CONSTANT_STRING,
+	CONSTANT_ADDRESS,
 	CONSTANT_SCIENTIFIC_NOTATION
 } ConstantType;
 

@@ -414,11 +414,11 @@ Parameters *ParametersGrammarAction(Parameters *parameters, DataType *dataType, 
 	return params;
 }
 
-Expression *ExpressionGrammarAction(ExpressionType type, Expression *leftExpression, Expression *rightExpression) {
+Expression *ExpressionGrammarAction(ExpressionType type, Expression *left, Expression *right) {
 	Expression *expression = calloc(1, sizeof(Expression));
 	expression->type = type;
-	expression->leftExpression = leftExpression;
-	expression->rightExpression = rightExpression;
+	expression->left = left;
+	expression->right = right;
 	return expression;
 }
 

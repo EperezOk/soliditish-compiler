@@ -298,7 +298,7 @@ expression: expression[left] ADD expression[right]								{ $$ = ExpressionGramm
 	| expression[left] GTE expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_GREATER_THAN_OR_EQUAL, $left, $right); }
 	| expression[left] AND expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_AND, $left, $right); }
 	| expression[left] OR expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_OR, $left, $right); }
-	| NOT expression															{ $$ = ExpressionGrammarAction(EXPRESSION_NOT, $2, NULL); }
+	| NOT expression															{ $$ = ExpressionGrammarAction(EXPRESSION_NOT, NULL, $2); }
 	| factor																	{ $$ = FactorExpressionGrammarAction($1); }
 	;
 
