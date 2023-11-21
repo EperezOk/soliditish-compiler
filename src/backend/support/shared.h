@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "../semantic-analysis/abstract-syntax-tree.h"
+#include "../semantic-analysis/symbol-table.h"
 
 // Descriptor del archivo de entrada que utiliza Bison.
 extern FILE * yyin;
@@ -30,30 +31,22 @@ extern int yylex(void);
 // Función global del analizador sintáctico Bison.
 extern int yyparse(void);
 
-// Emular tipo "boolean".
-typedef enum {
-
-	false = 0,
-	true = 1
-} boolean;
-
 // El tipo de los tokens emitidos por Flex.
 typedef int token;
 
 // Estado global de toda la aplicación.
 typedef struct {
-
 	// Indica si la compilación tuvo problemas hasta el momento.
 	boolean succeed;
 
 	// El nodo raíz del AST (se usará cuando se implemente el backend).
-	Program * program;
+	Program *program;
 
 	// Agregar lo que sea necesario para el compilador.
 	// Agregar una pila para manipular scopes.
 	// Agregar una tabla de símbolos.
 	// ...
-
+	SymbolTableEntry *symbolTable;
 } CompilerState;
 
 // El estado se define e inicializa en el archivo "main.c".

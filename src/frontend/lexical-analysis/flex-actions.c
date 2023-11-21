@@ -20,28 +20,21 @@
  * (mediante $1, $2, $3, etc.).
  */
 
-void BeginCommentPatternAction() {
-	LogDebug("[Flex] [COMMENT] BeginCommentPatternAction............................");
-}
+void BeginCommentPatternAction() {}
 
-void EndCommentPatternAction() {
-	LogDebug("[Flex] [COMMENT] EndCommentPatternAction..............................");
-}
+void EndCommentPatternAction() {}
 
 token TokenPatternAction(const char *lexeme, token token) {
-	LogDebug("[Flex] TokenPatternAction: '%s'", lexeme);
 	yylval.token = token;
 	return token;
 }
 
 token StringValuePatternAction(const char *lexeme, const int length, token token) {
-	LogDebug("[Flex] StringValuePatternAction: '%s' (length = %d).", lexeme, length);
 	yylval.string = strndup(lexeme, length);
 	return token;
 }
 
 token BooleanPatternAction(const char *lexeme, const int length) {
-	LogDebug("[Flex] BooleanPatternAction: '%s' (length = %d).", lexeme, length);
 	char *lexemeCopy = strndup(lexeme, length);
 	yylval.integer = strncmp(lexemeCopy, "true", length) == 0; // 1 = true, 0 = false
 	free(lexemeCopy);
@@ -49,7 +42,6 @@ token BooleanPatternAction(const char *lexeme, const int length) {
 }
 
 token IntegerPatternAction(const char *lexeme, const int length) {
-	LogDebug("[Flex] IntegerPatternAction: '%s' (length = %d).", lexeme, length);
 	char *lexemeCopy = strndup(lexeme, length);
 	yylval.integer = atoi(lexemeCopy);
 	free(lexemeCopy);
@@ -58,7 +50,6 @@ token IntegerPatternAction(const char *lexeme, const int length) {
 
 token UnknownPatternAction(const char *lexeme, const int length) {
 	char *lexemeCopy = strndup(lexeme, length);
-	LogDebug("[Flex] UnknownPatternAction: '%s' (length = %d).", lexemeCopy, length);
 	free(lexemeCopy);
 	yylval.token = ERROR;
 	// Al emitir este token, el compilador aborta la ejecución.
@@ -67,9 +58,6 @@ token UnknownPatternAction(const char *lexeme, const int length) {
 
 void IgnoredPatternAction(const char *lexeme, const int length) {
 	char *lexemeCopy = strndup(lexeme, length);
-	LogRaw("[DEBUG] [Flex] IgnoredPatternAction: '");
-	LogText(lexemeCopy, length);
-	LogRaw("' (length = %d).\n", length);
 	free(lexemeCopy);
 	// Como no debe hacer nada con el patrón, solo se loguea en consola.
 	// No se emite ningún token.
