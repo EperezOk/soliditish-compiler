@@ -13,10 +13,9 @@ boolean symbolExists(char *identifier) {
     return res;
 }
 
-void insertSymbol(char *identifier, VariableType type) {
+void insertSymbol(char *identifier) {
     SymbolTableEntry *symbol = calloc(1, sizeof(SymbolTableEntry));
     symbol->identifier = identifier;
-    symbol->type = type;
     HASH_ADD_KEYPTR(hh, state.symbolTable, symbol->identifier, strlen(identifier), symbol);
 }
 

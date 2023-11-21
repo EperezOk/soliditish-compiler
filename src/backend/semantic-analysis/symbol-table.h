@@ -8,35 +8,16 @@ typedef enum {
 	true = 1
 } boolean;
 
-typedef enum {
-    SYMBOL_UINT,
-    SYMBOL_INT,
-    SYMBOL_ADDRESS,
-    SYMBOL_STRING,
-    SYMBOL_BYTES,
-    SYMBOL_BOOLEAN,
-    SYMBOL_ERC20,
-    SYMBOL_ERC721,
-    SYMBOL_EVENT,
-    SYMBOL_ARRAY_UINT,
-    SYMBOL_ARRAY_INT,
-    SYMBOL_ARRAY_ADDRESS,
-    SYMBOL_ARRAY_STRING,
-    SYMBOL_ARRAY_BYTES,
-    SYMBOL_ARRAY_BOOLEAN,
-    SYMBOL_ARRAY_ERC20,
-    SYMBOL_ARRAY_ERC721
-} VariableType;
-
 typedef struct SymbolTableEntry {
-    char *identifier;
-    VariableType type;
+    char *identifier;  // hash key
+    // Add more fields here if needed
+
     UT_hash_handle hh; // makes this structure hashable
 } SymbolTableEntry;
 
 boolean symbolExists(char *identifier);
 
-void insertSymbol(char *identifier, VariableType type);
+void insertSymbol(char *identifier);
 
 void freeSymbolTable();
 

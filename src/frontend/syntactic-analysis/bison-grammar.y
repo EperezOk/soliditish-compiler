@@ -251,8 +251,9 @@ arguments: arguments COMMA expression											{ $$ = ArgumentsGrammarAction($1
 member_call: assignable DOT function_call										{ $$ = MemberCallGrammarAction($1, $3); }
 	;
 
-variable_definition: data_type IDENTIFIER										{ $$ = VariableDeclarationGrammarAction($1, $2); }
-	| data_type assignment														{ $$ = VariableInitializationGrammarAction($1, $2); }
+variable_definition: data_type IDENTIFIER										{ $$ = VariableDefinitionGrammarAction($1, $2); }
+	| data_type IDENTIFIER EQ expression										{ $$ = VariableDefExpressionGrammarAction($1, $2, $4); }
+	| data_type IDENTIFIER EQ function_call										{ $$ = VariableDefFunctionCallGrammarAction($1, $2, $4); }
 	;
 
 data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC20); }

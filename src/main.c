@@ -17,22 +17,22 @@ const int main(const int argumentCount, const char ** arguments) {
 
 	// Mostrar parámetros recibidos por consola.
 	for (int i = 0; i < argumentCount; ++i) {
-		LogInfo("Argumento %d: '%s'", i, arguments[i]);
+		LogInfo("Argument %d: '%s'", i, arguments[i]);
 	}
 
 	// Compilar el programa de entrada.
-	LogInfo("Compilando...\n");
+	LogInfo("Compiling...\n");
 	const int result = yyparse(); // lee de stdin y escribe en stdout
 	switch (result) {
 		case 0:
 			// La variable "succeed" es la que setea Bison al identificar el símbolo
 			// inicial de la gramática satisfactoriamente.
 			if (state.succeed) {
-				LogInfo("La compilacion fue exitosa.");
+				LogInfo("Compilation successful.");
 				Generator(1);
 			}
 			else {
-				LogError("La compilación terminó con %d errores:", state.errorCount);
+				LogError("Found %d compilation errors:", state.errorCount);
 				freeSymbolTable();
 				for (int i = 0; i < state.errorCount; ++i) {
 					LogError("%s", state.errors[i]);
@@ -42,19 +42,17 @@ const int main(const int argumentCount, const char ** arguments) {
 			}
 			break;
 		case 1:
-			LogError("Bison finalizo debido a un error de sintaxis.");
+			LogError("[Bison] Syntax error.");
 			break;
 		case 2:
-			LogError("Bison finalizo abruptamente debido a que ya no hay memoria disponible.");
+			LogError("[Bison] Out of memory.");
 			break;
 		default:
-			LogError("Error desconocido mientras se ejecutaba el analizador Bison (codigo %d).", result);
+			LogError("[Bison] Unknown error (code %d).", result);
 	}
 
-	LogInfo("Liberando memoria...");
+	LogInfo("Freeing up memory...");
 	freeSymbolTable();
-
-	LogInfo("Fin.");
 	
 	return result;
 }

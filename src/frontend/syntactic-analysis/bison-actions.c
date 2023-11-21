@@ -16,10 +16,11 @@
 char ERR_MSG[MAX_ERROR_LENGTH];
 
 void addError(int errorLength) {
+	if (state.errorCount == MAX_ERRORS) return;
 	state.errors[state.errorCount] = malloc(sizeof(char) * (errorLength + 13));
 	sprintf(
 		state.errors[state.errorCount],
-		"Linea %d: %s", yylineno, ERR_MSG
+		"Line %d: %s.", yylineno, ERR_MSG
 	);
 	state.errorCount++;
 }
@@ -28,7 +29,7 @@ void addError(int errorLength) {
 * Esta función se ejecuta cada vez que se emite un error de sintaxis.
 */
 void yyerror(const char * string) {
-	LogErrorRaw("[ERROR] Mensaje: '%s', debido a '", string);
+	LogErrorRaw("[ERROR] Message: '%s', due to '", string);
 	for (int i = 0; i < yyleng; ++i) {
 		switch (yytext[i]) {
 			case '\n':
@@ -37,7 +38,7 @@ void yyerror(const char * string) {
 				LogErrorRaw("%c", yytext[i]);
 		}
 	}
-	LogErrorRaw("' (length = %d, linea %d).\n\n", yyleng, yylineno);
+	LogErrorRaw("' (length = %d, line %d).\n\n", yyleng, yylineno);
 }
 
 /**
@@ -112,9 +113,9 @@ ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(Function
 
 ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, ParameterDefinition *eventParams) {
 	if (symbolExists(eventIdentifier))
-		addError(sprintf(ERR_MSG, "El evento `%s` ya fue declarado", eventIdentifier));
+		addError(sprintf(ERR_MSG, "`%s` already exists", eventIdentifier));
 	else
-		insertSymbol(eventIdentifier, SYMBOL_EVENT);
+		insertSymbol(eventIdentifier);
 
 	ContractInstruction *contractInstruction = calloc(1, sizeof(ContractInstruction));
 	contractInstruction->type = EVENT_DECLARATION;
@@ -160,6 +161,9 @@ FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memb
 }
 
 FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs) {
+	if (!symbolExists(eventIdentifier))
+		addError(sprintf(ERR_MSG, "Event `%s` does not exist", eventIdentifier));
+
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
 	functionInstruction->type = FUNCTION_INSTRUCTION_EMIT_EVENT;
 	functionInstruction->eventIdentifier = eventIdentifier;
@@ -247,6 +251,9 @@ MathAssignment *IncDecGrammarAction(Assignable *variable, MathAssignmentType typ
 }
 
 Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex) {
+	if (!symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "Variable `%s` does not exist", identifier));
+
 	Assignable *assignable = calloc(1, sizeof(Assignable));
 	assignable->type = arrayIndex == NULL ? ASSIGNABLE_VARIABLE : ASSIGNABLE_ARRAY;
 	assignable->identifier = identifier;
@@ -291,6 +298,9 @@ MathAssignmentOperator *MathAssignmentOperatorGrammarAction(MathAssignmentOperat
 }
 
 FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) {
+	if (!symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "Function `%s` does not exist", identifier));
+
 	FunctionCall *functionCall = calloc(1, sizeof(FunctionCall));
 	functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
 	functionCall->identifier = identifier;
@@ -313,15 +323,38 @@ MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method) 
 	return memberCall;
 }
 
-VariableDefinition *VariableInitializationGrammarAction(DataType *dataType, Assignment *assignment) {
+VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char *identifier, Expression *expression) {
+	if (symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
+	else
+		insertSymbol(identifier);
+
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INITIALIZATION;
 	variableDefinition->dataType = dataType;
-	variableDefinition->assignment = assignment;
+	variableDefinition->expression = expression;
 	return variableDefinition;
 }
 
-VariableDefinition *VariableDeclarationGrammarAction(DataType *dataType, char *identifier) {
+VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, char *identifier, FunctionCall *functionCall) {
+	if (symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
+	else
+		insertSymbol(identifier);
+
+	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
+	variableDefinition->type = VARIABLE_DEFINITION_INITIALIZATION;
+	variableDefinition->dataType = dataType;
+	variableDefinition->functionCall = functionCall;
+	return variableDefinition;
+}
+
+VariableDefinition *VariableDefinitionGrammarAction(DataType *dataType, char *identifier) {
+	if (symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
+	else
+		insertSymbol(identifier);
+
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_DECLARATION;
 	variableDefinition->dataType = dataType;
@@ -344,6 +377,11 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 }
 
 FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, ParameterDefinition *pd, FunctionBlock *fb) {
+	if (symbolExists(id))
+		addError(sprintf(ERR_MSG, "`%s` already exists", id));
+	else
+		insertSymbol(id);
+
 	FunctionDefinition *functionDefinition = calloc(1, sizeof(FunctionDefinition));
 	functionDefinition->decorators = dec;
 	functionDefinition->parameterDefinition = pd;

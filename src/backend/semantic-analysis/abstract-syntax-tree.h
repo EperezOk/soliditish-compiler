@@ -219,7 +219,8 @@ typedef enum VariableDefinitionType{
 typedef struct VariableDefinition{
 	VariableDefinitionType type;
 	struct DataType *dataType;
-	struct Assignment *assignment;
+	struct Expression *expression;
+	struct FunctionCall *functionCall;
 	char *identifier;
 } VariableDefinition;
 

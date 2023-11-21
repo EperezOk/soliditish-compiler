@@ -62,8 +62,9 @@ Arguments *ArgumentsGrammarAction(Arguments *arguments, Expression *expression);
 
 MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method);
 
-VariableDefinition *VariableInitializationGrammarAction(DataType *dataType, Assignment *assignment);
-VariableDefinition *VariableDeclarationGrammarAction(DataType *dataType, char *identifier);
+VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char *identifier, Expression *expression);
+VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, char *identifier, FunctionCall *functionCall);
+VariableDefinition *VariableDefinitionGrammarAction(DataType *dataType, char *identifier);
 
 DataType *DataTypeSimpleGrammarAction(DataTypeType dataTypeType);
 DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression);
