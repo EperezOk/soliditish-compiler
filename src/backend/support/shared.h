@@ -6,6 +6,8 @@
 #include "../semantic-analysis/abstract-syntax-tree.h"
 #include "../semantic-analysis/symbol-table.h"
 
+#define MAX_ERRORS 100
+
 // Descriptor del archivo de entrada que utiliza Bison.
 extern FILE * yyin;
 
@@ -47,6 +49,12 @@ typedef struct {
 	// Agregar una tabla de símbolos.
 	// ...
 	SymbolTableEntry *symbolTable;
+
+	// Agregar un array para guardar los errores.
+	char *errors[MAX_ERRORS];
+	int errorCount;
+
+	// Agregar una pila para manipular scopes.
 } CompilerState;
 
 // El estado se define e inicializa en el archivo "main.c".

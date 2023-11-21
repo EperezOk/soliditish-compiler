@@ -32,8 +32,12 @@ const int main(const int argumentCount, const char ** arguments) {
 				Generator(1);
 			}
 			else {
-				LogError("Se produjo un error en la aplicacion.");
+				LogError("La compilación terminó con %d errores:", state.errorCount);
 				freeSymbolTable();
+				for (int i = 0; i < state.errorCount; ++i) {
+					LogError("%s", state.errors[i]);
+					free(state.errors[i]);
+				}
 				return -1;
 			}
 			break;
@@ -46,7 +50,11 @@ const int main(const int argumentCount, const char ** arguments) {
 		default:
 			LogError("Error desconocido mientras se ejecutaba el analizador Bison (codigo %d).", result);
 	}
-	LogInfo("Fin.");
+
+	LogInfo("Liberando memoria...");
 	freeSymbolTable();
+
+	LogInfo("Fin.");
+	
 	return result;
 }

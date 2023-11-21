@@ -3,12 +3,26 @@
 #include <stdlib.h>
 
 #include "../../backend/domain-specific/calculator.h"
+#include "../../backend/semantic-analysis/symbol-table.h"
 #include "../../backend/support/logger.h"
 #include "bison-actions.h"
+
+#define MAX_ERROR_LENGTH 150
 
 /**
  * Implementación de "bison-actions.h".
  */
+
+char ERR_MSG[MAX_ERROR_LENGTH];
+
+void addError(int errorLength) {
+	state.errors[state.errorCount] = malloc(sizeof(char) * (errorLength + 13));
+	sprintf(
+		state.errors[state.errorCount],
+		"Linea %d: %s", yylineno, ERR_MSG
+	);
+	state.errorCount++;
+}
 
 /**
 * Esta función se ejecuta cada vez que se emite un error de sintaxis.
@@ -41,7 +55,7 @@ Program *ProgramGrammarAction(struct ContractDefinition *contract) {
 	* cuyo campo "succeed" indica si la compilación fue o no exitosa, la cual
 	* es utilizada en la función "main".
 	*/
-	state.succeed = true;
+	state.succeed = state.errorCount == 0;
 	return program;
 }
 
@@ -97,6 +111,11 @@ ContractInstruction *FunctionDefinitionContractInstructionGrammarAction(Function
 }
 
 ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *eventIdentifier, ParameterDefinition *eventParams) {
+	if (symbolExists(eventIdentifier))
+		addError(sprintf(ERR_MSG, "El evento `%s` ya fue declarado", eventIdentifier));
+	else
+		insertSymbol(eventIdentifier, SYMBOL_EVENT);
+
 	ContractInstruction *contractInstruction = calloc(1, sizeof(ContractInstruction));
 	contractInstruction->type = EVENT_DECLARATION;
 	contractInstruction->eventIdentifier = eventIdentifier;

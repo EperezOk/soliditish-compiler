@@ -10,7 +10,6 @@ boolean symbolExists(char *identifier) {
 
     if (symbol != NULL) res = true;
 
-    free(symbol);
     return res;
 }
 
