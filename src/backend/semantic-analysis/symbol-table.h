@@ -37,6 +37,6 @@ boolean symbolExists(char *identifier);
 
 void insertSymbol(char *identifier, VariableType type);
 
-void freeSymbolTable(SymbolTableEntry *table);
+void freeSymbolTable();
 
 #endif

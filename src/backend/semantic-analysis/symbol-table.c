@@ -21,6 +21,11 @@ void insertSymbol(char *identifier, VariableType type) {
     HASH_ADD_KEYPTR(hh, state.symbolTable, symbol->identifier, strlen(identifier), symbol);
 }
 
-void freeSymbolTable(SymbolTableEntry *table) {
-    
+void freeSymbolTable() {
+    SymbolTableEntry *symbol, *tmp;
+
+    HASH_ITER(hh, state.symbolTable, symbol, tmp) {
+        HASH_DEL(state.symbolTable, symbol);
+        free(symbol);
+    }
 }

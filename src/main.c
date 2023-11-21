@@ -33,6 +33,7 @@ const int main(const int argumentCount, const char ** arguments) {
 			}
 			else {
 				LogError("Se produjo un error en la aplicacion.");
+				freeSymbolTable();
 				return -1;
 			}
 			break;
@@ -46,5 +47,6 @@ const int main(const int argumentCount, const char ** arguments) {
 			LogError("Error desconocido mientras se ejecutaba el analizador Bison (codigo %d).", result);
 	}
 	LogInfo("Fin.");
+	freeSymbolTable();
 	return result;
 }
