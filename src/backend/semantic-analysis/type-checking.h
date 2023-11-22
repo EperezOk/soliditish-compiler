@@ -2,9 +2,14 @@
 #define __GET_TYPES_HEADER__
 
 #include <stdlib.h> // strtoll
-#include "shared.h"
-#include "../../backend/semantic-analysis/symbol-table.h"
+#include "../support/shared.h"
+#include "./symbol-table.h"
 
+int typeAssignment(Assignment *assignment);
+int typeMathAssignment(MathAssignment *mathAssignment);
+int typeFunctionCall(FunctionCall *functionCall);
+int typeMemberCall(MemberCall *memberCall);
+int typeVariableDefinition(VariableDefinition *variableDefinition);
 int typeExpression(Expression * expression);
 int typeFactor(Factor * factor);
 int typeConstant(Constant * constant);

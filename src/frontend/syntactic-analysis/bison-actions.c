@@ -5,6 +5,7 @@
 #include "../../backend/domain-specific/builtins.h"
 #include "../../backend/semantic-analysis/symbol-table.h"
 #include "../../backend/support/logger.h"
+#include "../../backend/semantic-analysis/type-checking.h"
 #include "bison-actions.h"
 
 #define MAX_ERROR_LENGTH 150
@@ -85,6 +86,9 @@ Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBl
 	conditional->condition = condition;
 	conditional->ifBlock = ifBlock;
 	conditional->elseBlock = elseBlock;
+
+	if(typeExpression(condition) != DATA_TYPE_BOOLEAN)
+		addError(sprintf(ERR_MSG, "Condition must be a boolean"));
 	return conditional;
 }
 
@@ -168,6 +172,9 @@ FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdenti
 	functionInstruction->type = FUNCTION_INSTRUCTION_EMIT_EVENT;
 	functionInstruction->eventIdentifier = eventIdentifier;
 	functionInstruction->eventArgs = eventArgs;
+
+	if(typeVariable(eventIdentifier) != DATA_TYPE_EVENT)
+		addError(sprintf(ERR_MSG, "Variable is not an event"));
 	return functionInstruction;	
 }
 
@@ -247,6 +254,9 @@ MathAssignment *IncDecGrammarAction(Assignable *variable, MathAssignmentType typ
 	MathAssignment *mathAssignment = calloc(1, sizeof(MathAssignment));
 	mathAssignment->type = type;
 	mathAssignment->variable = variable;
+
+	if (typeMathAssignment(mathAssignment) == -1)
+		addError(sprintf(ERR_MSG, "Can not apply math operators to variable"));
 	return mathAssignment;
 }
 
@@ -266,6 +276,9 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 	assignment->type = ASSIGNMENT_EXPRESSION;
 	assignment->assignable = assignable;
 	assignment->expression = expression;
+
+	if (typeAssignment(assignment) == -1)
+		addError(sprintf(ERR_MSG, "Invalid assignment to variable"));
 	return assignment;
 }
 
@@ -274,6 +287,9 @@ Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *
 	assignment->type = ASSIGNMENT_ARRAY_INITIALIZATION;
 	assignment->assignable = assignable;
 	assignment->arrayElements = arrayElements;
+
+	if (typeAssignment(assignment) == -1)
+		addError(sprintf(ERR_MSG, "Invalid assignment to variable"));
 	return assignment;
 }
 
@@ -291,6 +307,10 @@ MathAssignment *MathAssignmentGrammarAction(Assignable *variable, MathAssignment
 	mathAssignment->variable = variable;
 	mathAssignment->operator = operator;
 	mathAssignment->expression = expression;
+
+	if (typeMathAssignment(mathAssignment) == -1)
+		addError(sprintf(ERR_MSG, "Can not apply math operators to variable"));
+
 	return mathAssignment;
 }
 
@@ -313,6 +333,9 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 	
 	functionCall->identifier = identifier;
 	functionCall->arguments = arguments;
+
+	if (typeFunctionCall(functionCall) == -1)
+		addError(sprintf(ERR_MSG, "Variable is not callable"));
 	return functionCall;
 }
 
@@ -334,6 +357,9 @@ MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method) 
 	MemberCall *memberCall = calloc(1, sizeof(MemberCall));
 	memberCall->instance = instance;
 	memberCall->method = method;
+
+	if (typeMemberCall(memberCall) == -1) 
+		addError(sprintf(ERR_MSG, "Invalid function call"));
 	return memberCall;
 }
 
@@ -348,6 +374,10 @@ VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char 
 	variableDefinition->dataType = dataType;
 	variableDefinition->identifier = identifier;
 	variableDefinition->expression = expression;
+
+	if (typeVariableDefinition(variableDefinition) == -1) 
+		addError(sprintf(ERR_MSG, "Invalid variable definition"));
+
 	return variableDefinition;
 }
 
@@ -389,6 +419,9 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 	arrayDataType->type = expression == NULL ? DATA_TYPE_DYNAMIC_ARRAY : DATA_TYPE_STATIC_ARRAY;
 	arrayDataType->dataType = dataType;
 	arrayDataType->expression = expression;
+
+	if (expression != NULL && typeExpression(expression) == -1) 
+		addError(sprintf(ERR_MSG, "Incorrect dimension in array initialization."));
 	return arrayDataType;
 }
 
@@ -437,6 +470,10 @@ Expression *ExpressionGrammarAction(ExpressionType type, Expression *left, Expre
 	expression->type = type;
 	expression->left = left;
 	expression->right = right;
+
+	if (typeExpression(expression) == -1)
+		addError(sprintf(ERR_MSG, "Operation between incompatible types"));
+
 	return expression;
 }
 
