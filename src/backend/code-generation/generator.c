@@ -139,9 +139,22 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 }
 
 static void generateFunctionCall(FunctionCall *functionCall) {
-	output("%s(", functionCall->identifier);
-	if (functionCall->type == FUNCTION_CALL_WITH_ARGS)
+	switch (functionCall->type)	{
+		case FUNCTION_CALL_NO_ARGS:
+		case FUNCTION_CALL_WITH_ARGS:
+			output("%s", functionCall->identifier);
+			break;
+		case BUILT_IN_LOG:
+			output("console.log");
+			break;
+		// TODO: handle `createProxyTo` built-in function
+	}
+
+	output("(");
+
+	if (functionCall->type != FUNCTION_CALL_NO_ARGS)
 		generateArguments(functionCall->arguments);
+
 	output(")");
 }
 

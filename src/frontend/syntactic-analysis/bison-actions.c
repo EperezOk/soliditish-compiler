@@ -305,7 +305,12 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 		addError(sprintf(ERR_MSG, "Function `%s` does not exist", identifier));
 
 	FunctionCall *functionCall = calloc(1, sizeof(FunctionCall));
-	functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+
+	if (isBuiltInFunction(identifier))
+		functionCall->type = getBuiltInType(identifier);
+	else
+		functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+	
 	functionCall->identifier = identifier;
 	functionCall->arguments = arguments;
 	return functionCall;
