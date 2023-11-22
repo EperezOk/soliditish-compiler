@@ -69,7 +69,7 @@
 %token <token> MOD_EQ
 
 // Comparadores
-%token <token> IS_EQ
+%token <token> EQ_EQ
 %token <token> NEQ
 %token <token> LT
 %token <token> LTE
@@ -148,7 +148,7 @@
 %type <constant> constant
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
-%left IS_EQ NEQ LT LTE GT GTE
+%left EQ_EQ NEQ LT LTE GT GTE
 %left AND OR
 %right NOT
 %left ADD SUB // menor precedencia
@@ -290,7 +290,7 @@ expression: expression[left] ADD expression[right]								{ $$ = ExpressionGramm
 	| expression[left] DIV expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_DIVISION, $left, $right); }
 	| expression[left] MOD expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_MODULO, $left, $right); }
 	| expression[left] EXP expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EXPONENTIATION, $left, $right); }
-	| expression[left] IS_EQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EQUALITY, $left, $right); }
+	| expression[left] EQ_EQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EQUALITY, $left, $right); }
 	| expression[left] NEQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_INEQUALITY, $left, $right); }
 	| expression[left] LT expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN, $left, $right); }
 	| expression[left] LTE expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN_OR_EQUAL, $left, $right); }

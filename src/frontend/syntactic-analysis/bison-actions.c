@@ -162,7 +162,7 @@ FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memb
 
 FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs) {
 	if (!symbolExists(eventIdentifier))
-		addError(sprintf(ERR_MSG, "Event `%s` does not exist", eventIdentifier));
+		addError(sprintf(ERR_MSG, "Error: undefined event `%s`", eventIdentifier));
 
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
 	functionInstruction->type = FUNCTION_INSTRUCTION_EMIT_EVENT;
