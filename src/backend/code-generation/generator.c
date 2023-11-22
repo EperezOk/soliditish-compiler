@@ -208,21 +208,40 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 static void generateFunctionCall(FunctionCall *functionCall) {
 	switch (functionCall->type)	{
 		case FUNCTION_CALL_NO_ARGS:
+			output("%s()", functionCall->identifier);
+			break;
 		case FUNCTION_CALL_WITH_ARGS:
-			output("%s", functionCall->identifier);
+			output("%s(", functionCall->identifier);
+			generateArguments(functionCall->arguments);
+			output(")");
+			break;
+		case BUILT_IN_TRANSFER_ETH:
+			Arguments *amountArg = functionCall->arguments;
+			Arguments *addressArg = amountArg->arguments;
+
+			char *address;
+
+			if (addressArg->expression->factor->constant->type == CONSTANT_ADDRESS)
+				address = addressArg->expression->factor->constant->string;
+			else
+				address = addressArg->expression->factor->constant->variable->identifier;
+
+			if (amountArg->expression->factor->constant->type == CONSTANT_INTEGER) {
+				int amount = amountArg->expression->factor->constant->value;
+				output("address(%s).call{value: %d}()", address, amount);
+			}
+			else if (amountArg->expression->factor->constant->type == CONSTANT_SCIENTIFIC_NOTATION) {
+				char *amount = amountArg->expression->factor->constant->string;
+				output("address(%s).call{value: %s}()", address, amount);
+			}
 			break;
 		case BUILT_IN_LOG:
-			output("console.log");
+			output("console.log(");
+			generateArguments(functionCall->arguments);
+			output(")");
 			break;
-		// TODO: handle `createProxyTo` built-in function
+		// TODO: handle missing built-ins
 	}
-
-	output("(");
-
-	if (functionCall->type != FUNCTION_CALL_NO_ARGS)
-		generateArguments(functionCall->arguments);
-
-	output(")");
 }
 
 static void generateArguments(Arguments *arguments) {
