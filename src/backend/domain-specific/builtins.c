@@ -3,15 +3,16 @@
 
 const char *BUILT_IN_FUNCTIONS[] = {
     "transfer",
+    "balanceOf",
     "log",
     "mint",
-    "createProxyTo",
-    // TODO: add missing built-in functions and members. Then, add them to the code generator.
+    "createProxyTo"
 };
 
 // Note: built-ins starting with `BUILT_IN` are transformed during code generation
 const FunctionCallType BUILT_IN_FUNCTION_TYPES[] = {
     FUNCTION_CALL_WITH_ARGS,
+    BUILT_IN_BALANCE_OF,
     BUILT_IN_LOG,
     FUNCTION_CALL_WITH_ARGS,
     BUILT_IN_CREATE_PROXY_TO

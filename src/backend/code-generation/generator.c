@@ -139,6 +139,7 @@ static void includeDependencies(Program *program) {
 	}
 
 	// Add imports
+	output("import \"@openzeppelin/contracts/utils/ReentrancyGuard.sol\";\n"); // public functions are nonReentrant
 	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
 	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
 	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
@@ -147,7 +148,7 @@ static void includeDependencies(Program *program) {
 }
 
 static void generateProgram(Program *program) {
-	output("contract %s ", program->contract->identifier);
+	output("contract %s is ReentrancyGuard ", program->contract->identifier);
 	output("{");
 	generateContractInstructions(program->contract->block->instructions);
 	output("}\n");
@@ -243,15 +244,20 @@ static void generateFunctionDefinition(FunctionDefinition *function) {
 	output("function %s", function->identifier);
 	generateParameterDefinition(function->parameterDefinition);
 
+	boolean isPublic = false;
+
 	Decorators *decorators = function->decorators;
 	if (decorators->decorator == NULL) {
 		// If no decorator is specified, the function will be internal by default
 		output(" internal");
 	}
 	while (decorators->decorator != NULL) {
+		if (strcmp(decorators->decorator, "public") == 0) isPublic = true;
 		output(" %s", decorators->decorator);
 		decorators = decorators->decorators;
 	}
+
+	if (isPublic) output(" nonReentrant");
 
 	output(" ");
 	generateFunctionBlock(function->functionBlock);
