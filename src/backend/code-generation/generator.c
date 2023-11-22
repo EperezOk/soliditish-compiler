@@ -7,12 +7,13 @@
  * Implementación de "generator.h".
  */
 
-FILE *outputFile = NULL;
+extern FILE *outputFile;
+extern int indentationSize;
+extern boolean indentUsingSpaces;
+extern boolean indentOutput;
+
 int indentationLevel = 0;
-int indentationSize = 4;
-boolean indentUsingSpaces = true;
 boolean indentNextOutput = false;
-boolean indent = false;
 
 static void generateProgram(Program *program);
 static void generateContractInstructions(ContractInstructions *instructions);
@@ -41,12 +42,8 @@ static void generateAssignment(Assignment *assignment);
 static void generateMathAssignment(MathAssignment *mathAssignment);
 static void generateMathAssignmentOperator(MathAssignmentOperator *operator);
 
-void Generator(FILE *out, int indentSize, boolean indentSpaces, boolean indentOutput) {
+void Generator() {
 	LogInfo("Generating output...");
-	outputFile = out;
-	indentationSize = indentSize;
-	indentUsingSpaces = indentSpaces;
-	indent = indentOutput;
 	generateProgram(state.program);
 }
 
@@ -73,7 +70,7 @@ static void output(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
 
-	if (indent) applyIndentation(format[0], format[strlen(format) - 1]);
+	if (indentOutput) applyIndentation(format[0], format[strlen(format) - 1]);
 
 	vfprintf(outputFile, format, args);
 
