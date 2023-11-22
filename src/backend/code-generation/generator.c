@@ -215,7 +215,7 @@ static void generateFunctionCall(FunctionCall *functionCall) {
 			generateArguments(functionCall->arguments);
 			output(")");
 			break;
-		case BUILT_IN_TRANSFER_ETH:
+		case BUILT_IN_TRANSFER_ETH: {
 			Arguments *amountArg = functionCall->arguments;
 			Arguments *addressArg = amountArg->arguments;
 
@@ -235,6 +235,19 @@ static void generateFunctionCall(FunctionCall *functionCall) {
 				output("address(%s).call{value: %s}()", address, amount);
 			}
 			break;
+		}
+		case BUILT_IN_BALANCE: {
+			Constant *addressArg = functionCall->arguments->expression->factor->constant;
+			char *address;
+
+			if (addressArg->type == CONSTANT_ADDRESS)
+				address = addressArg->string;
+			else if (addressArg->type == CONSTANT_VARIABLE)
+				address = addressArg->variable->identifier;
+
+			output("address(%s).balance", address);
+			break;
+		}
 		case BUILT_IN_LOG:
 			output("console.log(");
 			generateArguments(functionCall->arguments);
