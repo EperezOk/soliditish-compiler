@@ -64,11 +64,11 @@ string          \"[^"]*\"
 "**"										{ return EXP; }
 
 "=="										{ return EQ_EQ; }
-"!="										{ return NEQ }
-"<"											{ return LT }
-"<="										{ return LTE }
-">"											{ return GT }
-">="										{ return GTE }
+"!="										{ return NEQ; }
+"<"											{ return LT; }
+"<="										{ return LTE; }
+">"											{ return GT; }
+">="										{ return GTE; }
 
 "++"                                        { return INC; }
 "--"                                        { return DEC; }
