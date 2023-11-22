@@ -59,6 +59,7 @@ MathAssignmentOperator *MathAssignmentOperatorGrammarAction(MathAssignmentOperat
 FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments);
 
 Arguments *ArgumentsGrammarAction(Arguments *arguments, Expression *expression);
+Arguments *ArgumentsEmptyGrammarAction();
 
 MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method);
 

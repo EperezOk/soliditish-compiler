@@ -5,7 +5,8 @@ const char *BUILT_IN_FUNCTIONS[] = {
     "transfer",
     "log",
     "mint",
-    "createProxyTo"
+    "createProxyTo",
+    // TODO: add missing built-in functions and members. Then, add them to the code generator.
 };
 
 // Note: built-ins starting with `BUILT_IN` are transformed during code generation

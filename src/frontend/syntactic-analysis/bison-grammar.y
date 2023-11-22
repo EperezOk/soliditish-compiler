@@ -195,7 +195,7 @@ function_instruction: variable_definition SEMI									{ $$ = VariableDefinition
 	| conditional																{ $$ = ConditionalFunctionInstructionGrammarAction($1); }
 	| function_call SEMI														{ $$ = FunctionCallFunctionInstructionGrammarAction($1); }
 	| member_call SEMI															{ $$ = MemberCallFunctionInstructionGrammarAction($1); }
-	| EMIT IDENTIFIER arguments SEMI											{ $$ = EmitEventFunctionInstructionGrammarAction($2, $3); }
+	| EMIT IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS SEMI			{ $$ = EmitEventFunctionInstructionGrammarAction($2, $4); }
 	| assignment SEMI															{ $$ = AssignmentFunctionInstructionGrammarAction($1); }
 	| math_assignment SEMI														{ $$ = MathAssignmentFunctionInstructionGrammarAction($1); }
 	| loop																		{ $$ = LoopFunctionInstructionGrammarAction($1); }
@@ -240,12 +240,12 @@ math_assignment_operator: ADD_EQ												{ $$ = MathAssignmentOperatorGrammar
 	| MOD_EQ																	{ $$ = MathAssignmentOperatorGrammarAction(MATH_ASSIGNMENT_OP_MODULO_EQUAL); }
 	;
 
-function_call: IDENTIFIER OPEN_PARENTHESIS CLOSE_PARENTHESIS					{ $$ = FunctionCallGrammarAction($1, NULL); }
-	| IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS					{ $$ = FunctionCallGrammarAction($1, $3); }
+function_call: IDENTIFIER OPEN_PARENTHESIS arguments CLOSE_PARENTHESIS			{ $$ = FunctionCallGrammarAction($1, $3); }
 	;
 
 arguments: arguments COMMA expression											{ $$ = ArgumentsGrammarAction($1, $3); }
 	| expression																{ $$ = ArgumentsGrammarAction(NULL, $1); }
+	| %empty																	{ $$ = ArgumentsEmptyGrammarAction(); }
 	;
 
 member_call: assignable DOT function_call										{ $$ = MemberCallGrammarAction($1, $3); }

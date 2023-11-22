@@ -309,7 +309,7 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 	if (isBuiltInFunction(identifier))
 		functionCall->type = getBuiltInType(identifier);
 	else
-		functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+		functionCall->type = arguments->type == ARGUMENTS_EMPTY ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
 	
 	functionCall->identifier = identifier;
 	functionCall->arguments = arguments;
@@ -321,6 +321,12 @@ Arguments *ArgumentsGrammarAction(Arguments *arguments, Expression *expression) 
 	args->type = arguments == NULL ? ARGUMENTS_SINGLE : ARGUMENTS_MULTIPLE;
 	args->arguments = arguments;
 	args->expression = expression;
+	return args;
+}
+
+Arguments *ArgumentsEmptyGrammarAction() {
+	Arguments *args = calloc(1, sizeof(Arguments));
+	args->type = ARGUMENTS_EMPTY;
 	return args;
 }
 
