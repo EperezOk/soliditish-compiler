@@ -245,7 +245,8 @@ struct FunctionCall{
 
 typedef enum {
 	ARGUMENTS_MULTIPLE,
-	ARGUMENTS_SINGLE
+	ARGUMENTS_SINGLE,
+	ARGUMENTS_EMPTY
 } ArgumentsType;
 
 struct Arguments {
