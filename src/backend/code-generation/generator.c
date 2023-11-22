@@ -139,6 +139,7 @@ static void includeDependencies(Program *program) {
 	}
 
 	// Add imports
+	output("import \"@openzeppelin/contracts/utils/ReentrancyGuard.sol\";\n"); // public functions are nonReentrant
 	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
 	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
 	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
@@ -147,7 +148,7 @@ static void includeDependencies(Program *program) {
 }
 
 static void generateProgram(Program *program) {
-	output("contract %s ", program->contract->identifier);
+	output("contract %s is ReentrancyGuard ", program->contract->identifier);
 	output("{");
 	generateContractInstructions(program->contract->block->instructions);
 	output("}\n");
@@ -207,21 +208,53 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 static void generateFunctionCall(FunctionCall *functionCall) {
 	switch (functionCall->type)	{
 		case FUNCTION_CALL_NO_ARGS:
+			output("%s()", functionCall->identifier);
+			break;
 		case FUNCTION_CALL_WITH_ARGS:
-			output("%s", functionCall->identifier);
+			output("%s(", functionCall->identifier);
+			generateArguments(functionCall->arguments);
+			output(")");
 			break;
+		case BUILT_IN_TRANSFER_ETH: {
+			Arguments *amountArg = functionCall->arguments;
+			Arguments *addressArg = amountArg->arguments;
+
+			char *address;
+
+			if (addressArg->expression->factor->constant->type == CONSTANT_ADDRESS)
+				address = addressArg->expression->factor->constant->string;
+			else
+				address = addressArg->expression->factor->constant->variable->identifier;
+
+			if (amountArg->expression->factor->constant->type == CONSTANT_INTEGER) {
+				int amount = amountArg->expression->factor->constant->value;
+				output("address(%s).call{value: %d}()", address, amount);
+			}
+			else if (amountArg->expression->factor->constant->type == CONSTANT_SCIENTIFIC_NOTATION) {
+				char *amount = amountArg->expression->factor->constant->string;
+				output("address(%s).call{value: %s}()", address, amount);
+			}
+			break;
+		}
+		case BUILT_IN_BALANCE: {
+			Constant *addressArg = functionCall->arguments->expression->factor->constant;
+			char *address;
+
+			if (addressArg->type == CONSTANT_ADDRESS)
+				address = addressArg->string;
+			else if (addressArg->type == CONSTANT_VARIABLE)
+				address = addressArg->variable->identifier;
+
+			output("address(%s).balance", address);
+			break;
+		}
 		case BUILT_IN_LOG:
-			output("console.log");
+			output("console.log(");
+			generateArguments(functionCall->arguments);
+			output(")");
 			break;
-		// TODO: handle `createProxyTo` built-in function
+		// TODO: handle missing built-ins
 	}
-
-	output("(");
-
-	if (functionCall->type != FUNCTION_CALL_NO_ARGS)
-		generateArguments(functionCall->arguments);
-
-	output(")");
 }
 
 static void generateArguments(Arguments *arguments) {
@@ -243,15 +276,20 @@ static void generateFunctionDefinition(FunctionDefinition *function) {
 	output("function %s", function->identifier);
 	generateParameterDefinition(function->parameterDefinition);
 
+	boolean isPublic = false;
+
 	Decorators *decorators = function->decorators;
 	if (decorators->decorator == NULL) {
 		// If no decorator is specified, the function will be internal by default
 		output(" internal");
 	}
 	while (decorators->decorator != NULL) {
+		if (strcmp(decorators->decorator, "public") == 0) isPublic = true;
 		output(" %s", decorators->decorator);
 		decorators = decorators->decorators;
 	}
+
+	if (isPublic) output(" nonReentrant");
 
 	output(" ");
 	generateFunctionBlock(function->functionBlock);

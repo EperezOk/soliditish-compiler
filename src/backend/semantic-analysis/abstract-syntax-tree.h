@@ -233,6 +233,8 @@ struct MathAssignmentOperator{
 typedef enum {
 	FUNCTION_CALL_NO_ARGS,
 	FUNCTION_CALL_WITH_ARGS,
+	BUILT_IN_TRANSFER_ETH,
+	BUILT_IN_BALANCE,
 	BUILT_IN_LOG,
 	BUILT_IN_CREATE_PROXY_TO,
 } FunctionCallType;

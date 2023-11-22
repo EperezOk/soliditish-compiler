@@ -2,18 +2,22 @@
 #include "../semantic-analysis/abstract-syntax-tree.h"
 
 const char *BUILT_IN_FUNCTIONS[] = {
+    // ERC20 and ERC721 members
     "transfer",
+    // Built-in functions
+    "transferEth",
+    "balance",
     "log",
-    "mint",
-    "createProxyTo",
-    // TODO: add missing built-in functions and members. Then, add them to the code generator.
+    "createProxyTo"
 };
 
-// Note: built-ins starting with `BUILT_IN` are transformed during code generation
 const FunctionCallType BUILT_IN_FUNCTION_TYPES[] = {
+    // ERC20 and ERC721 members
     FUNCTION_CALL_WITH_ARGS,
+    // Built-in functions (these are transformed during code generation)
+    BUILT_IN_TRANSFER_ETH,
+    BUILT_IN_BALANCE,
     BUILT_IN_LOG,
-    FUNCTION_CALL_WITH_ARGS,
     BUILT_IN_CREATE_PROXY_TO
 };
 
