@@ -115,7 +115,7 @@ ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *event
 	if (symbolExists(eventIdentifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", eventIdentifier));
 	else
-		insertSymbol(eventIdentifier);
+		insertSymbol(eventIdentifier, DATA_TYPE_EVENT);
 
 	ContractInstruction *contractInstruction = calloc(1, sizeof(ContractInstruction));
 	contractInstruction->type = EVENT_DECLARATION;
@@ -335,7 +335,7 @@ VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char 
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_EXPRESSION;
@@ -349,7 +349,7 @@ VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, cha
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_FUNCTION_CALL;
@@ -363,7 +363,7 @@ VariableDefinition *VariableDefinitionGrammarAction(DataType *dataType, char *id
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_DECLARATION;
@@ -392,7 +392,7 @@ FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, P
 	else if (isBuiltInFunction(id))
 		addError(sprintf(ERR_MSG, "Cannot redeclare built-in function `%s`", id));
 	else
-		insertSymbol(id);
+		insertSymbol(id, DATA_TYPE_FUNCTION);
 
 	FunctionDefinition *functionDefinition = calloc(1, sizeof(FunctionDefinition));
 	functionDefinition->decorators = dec;
