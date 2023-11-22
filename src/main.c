@@ -18,6 +18,7 @@ boolean indentUsingSpaces = true;
 boolean indentOutput = true;
 
 void parseCliOptions(int argc, char *argv[]);
+void freeResources();
 
 const int main(int argumentCount, char *arguments[]) {
 	// Initialize the application state
@@ -43,7 +44,7 @@ const int main(int argumentCount, char *arguments[]) {
 					LogErrorRaw("%s\n", state.errors[i]);
 					free(state.errors[i]);
 				}
-				freeSymbolTable();
+				freeResources();
 				return -1;
 			}
 			break;
@@ -59,8 +60,7 @@ const int main(int argumentCount, char *arguments[]) {
 
 	LogInfo("Freeing up memory...");
 
-	freeSymbolTable();
-    if (outputFile != stdout) fclose(outputFile);
+	freeResources();
 	
 	return result;
 }
@@ -112,4 +112,9 @@ void parseCliOptions(int argc, char *argv[]) {
     LogRaw("- Indent with: %s\n", indentUsingSpaces ? "spaces" : "tabs");
     LogRaw("- Indent Output: %s\n", indentOutput ? "true" : "false");
 	LogRaw("\n");
+}
+
+void freeResources() {
+	freeSymbolTable();
+	if (outputFile != stdout) fclose(outputFile);
 }

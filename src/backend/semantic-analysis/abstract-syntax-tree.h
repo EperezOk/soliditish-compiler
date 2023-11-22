@@ -1,20 +1,20 @@
 #ifndef ABSTRACT_SYNTAX_TREE_HEADER
 #define ABSTRACT_SYNTAX_TREE_HEADER
 
-typedef struct Program{
+typedef struct Program {
 	struct ContractDefinition *contract;
 } Program;
 
-typedef struct ContractDefinition{
+typedef struct ContractDefinition {
 	char *identifier;
 	struct ContractBlock *block;
 } ContractDefinition;
 
-typedef struct ContractBlock{
+typedef struct ContractBlock {
 	struct ContractInstructions *instructions;
 } ContractBlock;
 
-typedef struct FunctionBlock{
+typedef struct FunctionBlock {
 	struct FunctionInstructions *instructions;
 } FunctionBlock;
 
@@ -23,7 +23,7 @@ typedef enum {
 	CONDITIONAL_WITH_ELSE,
 } ConditionalType;
 
-typedef struct Conditional{
+typedef struct Conditional {
 	ConditionalType type;
 	struct Expression *condition;
 	struct FunctionBlock *ifBlock;
@@ -47,7 +47,7 @@ typedef enum {
 	EVENT_DECLARATION,
 } ContractInstructionType;
 
-typedef struct ContractInstruction{
+typedef struct ContractInstruction {
 	ContractInstructionType type;
 	struct Decorators *variableDecorators;
 	struct VariableDefinition *variableDefinition;

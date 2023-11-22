@@ -15,6 +15,8 @@ extern boolean indentOutput;
 int indentationLevel = 0;
 boolean indentNextOutput = false;
 
+static void includeDependencies(Program *program);
+
 static void generateProgram(Program *program);
 static void generateContractInstructions(ContractInstructions *instructions);
 static void generateContractInstruction(ContractInstruction *instruction);
@@ -44,6 +46,7 @@ static void generateMathAssignmentOperator(MathAssignmentOperator *operator);
 
 void Generator() {
 	LogInfo("Generating output...");
+	includeDependencies(state.program);
 	generateProgram(state.program);
 }
 
@@ -75,6 +78,60 @@ static void output(const char *format, ...) {
 	vfprintf(outputFile, format, args);
 
 	va_end(args);
+}
+
+static void includeDependencies(Program *program) {
+	// License and pragma
+	output("// SPDX-License-Identifier: MIT\n");
+	output("pragma solidity ^0.8.0;\n\n");
+
+	boolean hasERC20 = false;
+	boolean hasERC721 = false;
+	boolean hasConsoleLog = false;
+	boolean allImportsAdded = false;
+
+	ContractInstructions *contractInstructions = program->contract->block->instructions;
+
+	// Search for required imports
+	while (contractInstructions->type != CONTRACT_INSTRUCTIONS_EMPTY && !allImportsAdded) {
+		ContractInstruction *contractInstruction = contractInstructions->instruction;
+
+		if (contractInstruction->type == STATE_VARIABLE_DECLARATION) {
+			DataType *dataType = contractInstruction->variableDefinition->dataType;
+			if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
+			else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
+		} else if (contractInstruction->type == FUNCTION_DECLARATION) {
+			FunctionInstructions *functionInstructions = contractInstruction->functionDefinition->functionBlock->instructions;
+			
+			while (functionInstructions->type != FUNCTION_INSTRUCTIONS_EMPTY && !allImportsAdded) {
+				FunctionInstruction *functionInstruction = functionInstructions->instruction;
+
+				if (functionInstruction->type == FUNCTION_INSTRUCTION_FUNCTION_CALL) {
+					FunctionCall *functionCall = functionInstruction->functionCall;
+					switch (functionCall->type) {
+						case BUILT_IN_LOG:
+							hasConsoleLog = true;
+							break;
+					}
+				} else if (functionInstruction->type == FUNCTION_INSTRUCTION_VARIABLE_DEFINITION) {
+					DataType *dataType = functionInstruction->variableDefinition->dataType;
+					if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
+					else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
+				}
+
+				functionInstructions = functionInstructions->instructions;
+				allImportsAdded = hasERC20 && hasERC721 && hasConsoleLog;
+			}
+		}
+		contractInstructions = contractInstructions->instructions;
+	}
+
+	// Add imports
+	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
+	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
+	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
+
+	output("\n");
 }
 
 static void generateProgram(Program *program) {
