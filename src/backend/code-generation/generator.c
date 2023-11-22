@@ -33,6 +33,13 @@ static void generateAssignable(Assignable *assignable);
 static void generateArguments(Arguments *arguments);
 static void generateConditional(Conditional *conditional);
 static void generateMemberCall(MemberCall *memberCall);
+static void generateLoop(Loop *loop);
+static void generateLoopInitialization(LoopInitialization *loopInit);
+static void generateLoopCondition(LoopCondition *condition);
+static void generateLoopIteration(LoopIteration *loopIteration);
+static void generateAssignment(Assignment *assignment);
+static void generateMathAssignment(MathAssignment *mathAssignment);
+static void generateMathAssignmentOperator(MathAssignmentOperator *operator);
 
 void Generator(FILE *out, int indentSize, boolean indentSpaces, boolean indentOutput) {
 	LogInfo("Generating output...");
@@ -208,7 +215,17 @@ static void generateFunctionInstruction(FunctionInstruction *instruction) {
 			generateArguments(instruction->eventArgs);
 			output(";\n");
 			break;
-		// TODO: complete
+		case FUNCTION_INSTRUCTION_ASSIGNMENT:
+			generateAssignment(instruction->assignment);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_MATH_ASSIGNMENT:
+			generateMathAssignment(instruction->mathAssignment);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_LOOP:
+			generateLoop(instruction->loop);
+			break;
 	}
 }
 
@@ -227,6 +244,105 @@ static void generateMemberCall(MemberCall *memberCall) {
 	generateAssignable(memberCall->instance);
 	output(".");
 	generateFunctionCall(memberCall->method);
+}
+
+static void generateLoop(Loop *loop) {
+	output("for (");
+	generateLoopInitialization(loop->loopInitialization);
+	output("; ");
+	generateLoopCondition(loop->loopCondition);
+	output("; ");
+	generateLoopIteration(loop->loopIteration);
+	output(") ");
+	generateFunctionBlock(loop->functionBlock);
+}
+
+static void generateLoopInitialization(LoopInitialization *loopInit) {
+	switch (loopInit->type) {
+		case LOOP_INITIALIZATION_VARIABLE_DEFINITION:
+			generateVariableDefinition(NULL, loopInit->variable);
+			break;
+		case LOOP_INITIALIZATION_ASSIGNMENT:
+			generateAssignment(loopInit->assignment);
+			break;
+		case LOOP_INITIALIZATION_MATH_ASSIGNMENT:
+			generateMathAssignment(loopInit->mathAssignment);
+			break;
+		case LOOP_INITIALIZATION_EMPTY:
+			break;
+	}
+}
+
+static void generateLoopCondition(LoopCondition *condition) {
+	if (condition->type == LOOP_CONDITION_CONDITIONAL)
+		generateExpression(condition->condition);
+}
+
+static void generateLoopIteration(LoopIteration *loopIteration) {
+	switch (loopIteration->type) {
+		case LOOP_ITERATION_ASSIGNMENT:
+			generateAssignment(loopIteration->assignment);
+			break;
+		case LOOP_ITERATION_MATH_ASSIGNMENT:
+			generateMathAssignment(loopIteration->mathAssignment);
+			break;
+		case LOOP_ITERATION_EMPTY:
+			break;
+	}
+}
+
+static void generateAssignment(Assignment *assignment) {
+	generateAssignable(assignment->assignable);
+	output(" = ");
+	switch (assignment->type) {
+		case ASSIGNMENT_EXPRESSION:
+			generateExpression(assignment->expression);
+			break;
+		case ASSIGNMENT_FUNCTION_CALL:
+			generateFunctionCall(assignment->functionCall);
+			break;
+		case ASSIGNMENT_ARRAY_INITIALIZATION:
+			output("[");
+			generateArguments(assignment->arrayElements);
+			output("]");
+			break;
+	}
+}
+
+static void generateMathAssignment(MathAssignment *mathAssignment) {
+	generateAssignable(mathAssignment->variable);
+	switch (mathAssignment->type) {
+		case MATH_ASSIGNMENT_OPERATOR:
+			generateMathAssignmentOperator(mathAssignment->operator);
+			generateExpression(mathAssignment->expression);
+			break;
+		case MATH_ASSIGNMENT_INCREMENT:
+			output("++");
+			break;
+		case MATH_ASSIGNMENT_DECREMENT:
+			output("--");
+			break;
+	}
+}
+
+static void generateMathAssignmentOperator(MathAssignmentOperator *operator) {
+	switch (operator->type) {
+		case MATH_ASSIGNMENT_OP_ADD_EQUAL:
+			output(" += ");
+			break;
+		case MATH_ASSIGNMENT_OP_SUBTRACT_EQUAL:
+			output(" -= ");
+			break;
+		case MATH_ASSIGNMENT_OP_MULTIPLY_EQUAL:
+			output(" *= ");
+			break;
+		case MATH_ASSIGNMENT_OP_DIVIDE_EQUAL:
+			output(" /= ");
+			break;
+		case MATH_ASSIGNMENT_OP_MODULO_EQUAL:
+			output(" %%= ");
+			break;
+	}
 }
 
 static void generateParameters(Parameters *params) {

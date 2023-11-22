@@ -264,6 +264,7 @@ Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex) {
 Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression *expression) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_EXPRESSION;
+	assignment->assignable = assignable;
 	assignment->expression = expression;
 	return assignment;
 }
@@ -271,6 +272,7 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_ARRAY_INITIALIZATION;
+	assignment->assignable = assignable;
 	assignment->arrayElements = arrayElements;
 	return assignment;
 }
@@ -278,6 +280,7 @@ Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *
 Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_FUNCTION_CALL;
+	assignment->assignable = assignable;
 	assignment->functionCall = functionCall;
 	return assignment;
 }

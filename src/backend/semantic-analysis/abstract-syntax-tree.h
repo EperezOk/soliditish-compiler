@@ -78,7 +78,7 @@ typedef enum {
 	FUNCTION_INSTRUCTION_LOOP,
 } FunctionInstructionType;
 
-typedef struct FunctionInstruction{
+typedef struct FunctionInstruction {
 	FunctionInstructionType type;
 	struct VariableDefinition *variableDefinition;
 	struct Conditional *conditional;
@@ -91,7 +91,7 @@ typedef struct FunctionInstruction{
 	struct Loop *loop;
 } FunctionInstruction;
 
-typedef struct Loop{
+typedef struct Loop {
 	struct LoopInitialization *loopInitialization;
 	struct LoopCondition *loopCondition;
 	struct LoopIteration *loopIteration;
@@ -105,7 +105,7 @@ typedef enum {
 	LOOP_INITIALIZATION_EMPTY,
 } LoopInitializationType;
 
-typedef struct LoopInitialization{
+typedef struct LoopInitialization {
 	LoopInitializationType type;
 	struct VariableDefinition *variable;
 	struct Assignment *assignment;
@@ -117,7 +117,7 @@ typedef enum {
 	LOOP_CONDITION_EMPTY,
 } LoopConditionType;
 
-typedef struct LoopCondition{
+typedef struct LoopCondition {
 	LoopConditionType type;
 	struct Expression *condition;
 } LoopCondition;
@@ -128,7 +128,7 @@ typedef enum {
 	LOOP_ITERATION_EMPTY,
 } LoopIterationType;
 
-typedef struct LoopIteration{
+typedef struct LoopIteration {
 	LoopIterationType type;
 	struct Assignment *assignment;
 	struct MathAssignment *mathAssignment;
@@ -139,7 +139,7 @@ typedef enum {
 	ASSIGNABLE_ARRAY,
 } AssignableType;
 
-typedef struct Assignable{
+typedef struct Assignable {
 	AssignableType type;
 	struct Expression *arrayIndex;
 	char *identifier;
@@ -151,7 +151,7 @@ typedef enum {
 	ASSIGNMENT_FUNCTION_CALL,
 } AssignmentType;
 
-typedef struct Assignment{
+typedef struct Assignment {
 	AssignmentType type;
 	struct Assignable *assignable;
 	struct Expression *expression;
@@ -165,7 +165,7 @@ typedef enum {
 	MATH_ASSIGNMENT_DECREMENT,
 } MathAssignmentType;
 
-typedef struct MathAssignment{
+typedef struct MathAssignment {
 	MathAssignmentType type;
 	struct Assignable *variable;
 	struct MathAssignmentOperator *operator;
@@ -180,7 +180,7 @@ typedef enum {
 	MATH_ASSIGNMENT_OP_MODULO_EQUAL,
 } MathAssignmentOperatorType;
 
-typedef struct MathAssignmentOperator{
+typedef struct MathAssignmentOperator {
 	MathAssignmentOperatorType type;
 } MathAssignmentOperator;
 
@@ -189,7 +189,7 @@ typedef enum {
 	FUNCTION_CALL_WITH_ARGS
 } FunctionCallType;
 
-typedef struct FunctionCall{
+typedef struct FunctionCall {
 	FunctionCallType type;
 	struct Arguments *arguments;
 	char *identifier;
@@ -211,13 +211,13 @@ typedef struct MemberCall{
 	struct FunctionCall *method;
 } MemberCall;
 
-typedef enum VariableDefinitionType{
+typedef enum VariableDefinitionType {
 	VARIABLE_DEFINITION_DECLARATION,
 	VARIABLE_DEFINITION_INIT_EXPRESSION,
 	VARIABLE_DEFINITION_INIT_FUNCTION_CALL,
 } VariableDefinitionType;
 
-typedef struct VariableDefinition{
+typedef struct VariableDefinition {
 	VariableDefinitionType type;
 	struct DataType *dataType;
 	struct Expression *expression;
@@ -244,7 +244,7 @@ typedef struct DataType {
 	struct Expression *expression;
 } DataType;
 
-typedef struct FunctionDefinition{
+typedef struct FunctionDefinition {
 	struct Decorators *decorators;
 	struct ParameterDefinition *parameterDefinition;
 	struct FunctionBlock *functionBlock;
@@ -267,7 +267,7 @@ typedef enum {
 	PARAMETERS_DEFINITION_WITH_PARAMS
 } ParameterDefinitionType;
 
-typedef struct ParameterDefinition{
+typedef struct ParameterDefinition {
 	ParameterDefinitionType type;
 	struct Parameters *parameters;
 } ParameterDefinition;
@@ -330,7 +330,7 @@ typedef enum {
 	CONSTANT_SCIENTIFIC_NOTATION
 } ConstantType;
 
-typedef struct Constant{
+typedef struct Constant {
 	ConstantType type;
 	struct Assignable *variable;
 	int value;
