@@ -4,5 +4,6 @@
 #include "../support/shared.h"
 
 boolean isBuiltInFunction(char *name);
+FunctionCallType getBuiltInType(char *name);
 
 #endif

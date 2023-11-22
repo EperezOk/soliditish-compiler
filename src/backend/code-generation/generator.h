@@ -3,6 +3,6 @@
 
 #include "../support/shared.h"
 
-void Generator(FILE *out, int indentSize, boolean indentSpaces, boolean indentOutput);
+void Generator();
 
 #endif

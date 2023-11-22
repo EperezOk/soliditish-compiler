@@ -232,7 +232,9 @@ struct MathAssignmentOperator{
 
 typedef enum {
 	FUNCTION_CALL_NO_ARGS,
-	FUNCTION_CALL_WITH_ARGS
+	FUNCTION_CALL_WITH_ARGS,
+	BUILT_IN_LOG,
+	BUILT_IN_CREATE_PROXY_TO,
 } FunctionCallType;
 
 struct FunctionCall{
@@ -257,7 +259,7 @@ struct MemberCall{
 	FunctionCall *method;
 };
 
-typedef enum VariableDefinitionType{
+typedef enum VariableDefinitionType {
 	VARIABLE_DEFINITION_DECLARATION,
 	VARIABLE_DEFINITION_INIT_EXPRESSION,
 	VARIABLE_DEFINITION_INIT_FUNCTION_CALL,

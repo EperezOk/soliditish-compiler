@@ -7,12 +7,15 @@
  * Implementación de "generator.h".
  */
 
-FILE *outputFile = NULL;
+extern FILE *outputFile;
+extern int indentationSize;
+extern boolean indentUsingSpaces;
+extern boolean indentOutput;
+
 int indentationLevel = 0;
-int indentationSize = 4;
-boolean indentUsingSpaces = true;
 boolean indentNextOutput = false;
-boolean indent = false;
+
+static void includeDependencies(Program *program);
 
 static void generateProgram(Program *program);
 static void generateContractInstructions(ContractInstructions *instructions);
@@ -33,13 +36,17 @@ static void generateAssignable(Assignable *assignable);
 static void generateArguments(Arguments *arguments);
 static void generateConditional(Conditional *conditional);
 static void generateMemberCall(MemberCall *memberCall);
+static void generateLoop(Loop *loop);
+static void generateLoopInitialization(LoopInitialization *loopInit);
+static void generateLoopCondition(LoopCondition *condition);
+static void generateLoopIteration(LoopIteration *loopIteration);
+static void generateAssignment(Assignment *assignment);
+static void generateMathAssignment(MathAssignment *mathAssignment);
+static void generateMathAssignmentOperator(MathAssignmentOperator *operator);
 
-void Generator(FILE *out, int indentSize, boolean indentSpaces, boolean indentOutput) {
+void Generator() {
 	LogInfo("Generating output...");
-	outputFile = out;
-	indentationSize = indentSize;
-	indentUsingSpaces = indentSpaces;
-	indent = indentOutput;
+	includeDependencies(state.program);
 	generateProgram(state.program);
 }
 
@@ -66,11 +73,65 @@ static void output(const char *format, ...) {
 	va_list args;
 	va_start(args, format);
 
-	if (indent) applyIndentation(format[0], format[strlen(format) - 1]);
+	if (indentOutput) applyIndentation(format[0], format[strlen(format) - 1]);
 
 	vfprintf(outputFile, format, args);
 
 	va_end(args);
+}
+
+static void includeDependencies(Program *program) {
+	// License and pragma
+	output("// SPDX-License-Identifier: MIT\n");
+	output("pragma solidity ^0.8.0;\n\n");
+
+	boolean hasERC20 = false;
+	boolean hasERC721 = false;
+	boolean hasConsoleLog = false;
+	boolean allImportsAdded = false;
+
+	ContractInstructions *contractInstructions = program->contract->block->instructions;
+
+	// Search for required imports
+	while (contractInstructions->type != CONTRACT_INSTRUCTIONS_EMPTY && !allImportsAdded) {
+		ContractInstruction *contractInstruction = contractInstructions->instruction;
+
+		if (contractInstruction->type == STATE_VARIABLE_DECLARATION) {
+			DataType *dataType = contractInstruction->variableDefinition->dataType;
+			if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
+			else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
+		} else if (contractInstruction->type == FUNCTION_DECLARATION) {
+			FunctionInstructions *functionInstructions = contractInstruction->functionDefinition->functionBlock->instructions;
+			
+			while (functionInstructions->type != FUNCTION_INSTRUCTIONS_EMPTY && !allImportsAdded) {
+				FunctionInstruction *functionInstruction = functionInstructions->instruction;
+
+				if (functionInstruction->type == FUNCTION_INSTRUCTION_FUNCTION_CALL) {
+					FunctionCall *functionCall = functionInstruction->functionCall;
+					switch (functionCall->type) {
+						case BUILT_IN_LOG:
+							hasConsoleLog = true;
+							break;
+					}
+				} else if (functionInstruction->type == FUNCTION_INSTRUCTION_VARIABLE_DEFINITION) {
+					DataType *dataType = functionInstruction->variableDefinition->dataType;
+					if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
+					else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
+				}
+
+				functionInstructions = functionInstructions->instructions;
+				allImportsAdded = hasERC20 && hasERC721 && hasConsoleLog;
+			}
+		}
+		contractInstructions = contractInstructions->instructions;
+	}
+
+	// Add imports
+	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
+	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
+	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
+
+	output("\n");
 }
 
 static void generateProgram(Program *program) {
@@ -132,9 +193,22 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 }
 
 static void generateFunctionCall(FunctionCall *functionCall) {
-	output("%s(", functionCall->identifier);
-	if (functionCall->type == FUNCTION_CALL_WITH_ARGS)
+	switch (functionCall->type)	{
+		case FUNCTION_CALL_NO_ARGS:
+		case FUNCTION_CALL_WITH_ARGS:
+			output("%s", functionCall->identifier);
+			break;
+		case BUILT_IN_LOG:
+			output("console.log");
+			break;
+		// TODO: handle `createProxyTo` built-in function
+	}
+
+	output("(");
+
+	if (functionCall->type != FUNCTION_CALL_NO_ARGS)
 		generateArguments(functionCall->arguments);
+
 	output(")");
 }
 
@@ -208,7 +282,17 @@ static void generateFunctionInstruction(FunctionInstruction *instruction) {
 			generateArguments(instruction->eventArgs);
 			output(";\n");
 			break;
-		// TODO: complete
+		case FUNCTION_INSTRUCTION_ASSIGNMENT:
+			generateAssignment(instruction->assignment);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_MATH_ASSIGNMENT:
+			generateMathAssignment(instruction->mathAssignment);
+			output(";\n");
+			break;
+		case FUNCTION_INSTRUCTION_LOOP:
+			generateLoop(instruction->loop);
+			break;
 	}
 }
 
@@ -227,6 +311,105 @@ static void generateMemberCall(MemberCall *memberCall) {
 	generateAssignable(memberCall->instance);
 	output(".");
 	generateFunctionCall(memberCall->method);
+}
+
+static void generateLoop(Loop *loop) {
+	output("for (");
+	generateLoopInitialization(loop->loopInitialization);
+	output("; ");
+	generateLoopCondition(loop->loopCondition);
+	output("; ");
+	generateLoopIteration(loop->loopIteration);
+	output(") ");
+	generateFunctionBlock(loop->functionBlock);
+}
+
+static void generateLoopInitialization(LoopInitialization *loopInit) {
+	switch (loopInit->type) {
+		case LOOP_INITIALIZATION_VARIABLE_DEFINITION:
+			generateVariableDefinition(NULL, loopInit->variable);
+			break;
+		case LOOP_INITIALIZATION_ASSIGNMENT:
+			generateAssignment(loopInit->assignment);
+			break;
+		case LOOP_INITIALIZATION_MATH_ASSIGNMENT:
+			generateMathAssignment(loopInit->mathAssignment);
+			break;
+		case LOOP_INITIALIZATION_EMPTY:
+			break;
+	}
+}
+
+static void generateLoopCondition(LoopCondition *condition) {
+	if (condition->type == LOOP_CONDITION_CONDITIONAL)
+		generateExpression(condition->condition);
+}
+
+static void generateLoopIteration(LoopIteration *loopIteration) {
+	switch (loopIteration->type) {
+		case LOOP_ITERATION_ASSIGNMENT:
+			generateAssignment(loopIteration->assignment);
+			break;
+		case LOOP_ITERATION_MATH_ASSIGNMENT:
+			generateMathAssignment(loopIteration->mathAssignment);
+			break;
+		case LOOP_ITERATION_EMPTY:
+			break;
+	}
+}
+
+static void generateAssignment(Assignment *assignment) {
+	generateAssignable(assignment->assignable);
+	output(" = ");
+	switch (assignment->type) {
+		case ASSIGNMENT_EXPRESSION:
+			generateExpression(assignment->expression);
+			break;
+		case ASSIGNMENT_FUNCTION_CALL:
+			generateFunctionCall(assignment->functionCall);
+			break;
+		case ASSIGNMENT_ARRAY_INITIALIZATION:
+			output("[");
+			generateArguments(assignment->arrayElements);
+			output("]");
+			break;
+	}
+}
+
+static void generateMathAssignment(MathAssignment *mathAssignment) {
+	generateAssignable(mathAssignment->variable);
+	switch (mathAssignment->type) {
+		case MATH_ASSIGNMENT_OPERATOR:
+			generateMathAssignmentOperator(mathAssignment->operator);
+			generateExpression(mathAssignment->expression);
+			break;
+		case MATH_ASSIGNMENT_INCREMENT:
+			output("++");
+			break;
+		case MATH_ASSIGNMENT_DECREMENT:
+			output("--");
+			break;
+	}
+}
+
+static void generateMathAssignmentOperator(MathAssignmentOperator *operator) {
+	switch (operator->type) {
+		case MATH_ASSIGNMENT_OP_ADD_EQUAL:
+			output(" += ");
+			break;
+		case MATH_ASSIGNMENT_OP_SUBTRACT_EQUAL:
+			output(" -= ");
+			break;
+		case MATH_ASSIGNMENT_OP_MULTIPLY_EQUAL:
+			output(" *= ");
+			break;
+		case MATH_ASSIGNMENT_OP_DIVIDE_EQUAL:
+			output(" /= ");
+			break;
+		case MATH_ASSIGNMENT_OP_MODULO_EQUAL:
+			output(" %%= ");
+			break;
+	}
 }
 
 static void generateParameters(Parameters *params) {

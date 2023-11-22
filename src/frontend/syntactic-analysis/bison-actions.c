@@ -264,6 +264,7 @@ Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex) {
 Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression *expression) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_EXPRESSION;
+	assignment->assignable = assignable;
 	assignment->expression = expression;
 	return assignment;
 }
@@ -271,6 +272,7 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_ARRAY_INITIALIZATION;
+	assignment->assignable = assignable;
 	assignment->arrayElements = arrayElements;
 	return assignment;
 }
@@ -278,6 +280,7 @@ Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *
 Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_FUNCTION_CALL;
+	assignment->assignable = assignable;
 	assignment->functionCall = functionCall;
 	return assignment;
 }
@@ -302,7 +305,12 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 		addError(sprintf(ERR_MSG, "Function `%s` does not exist", identifier));
 
 	FunctionCall *functionCall = calloc(1, sizeof(FunctionCall));
-	functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+
+	if (isBuiltInFunction(identifier))
+		functionCall->type = getBuiltInType(identifier);
+	else
+		functionCall->type = arguments == NULL ? FUNCTION_CALL_NO_ARGS : FUNCTION_CALL_WITH_ARGS;
+	
 	functionCall->identifier = identifier;
 	functionCall->arguments = arguments;
 	return functionCall;
