@@ -21,7 +21,17 @@ void insertSymbol(char *identifier, DataTypeType type) {
         symbol->type = type;
         HASH_ADD_STR(state.symbolTable, identifier, symbol);
     }
-    
+}
+
+void removeSymbol(char *identifier) {
+    SymbolTableEntry *symbol;
+
+    HASH_FIND_STR(state.symbolTable, identifier, symbol);
+
+    if (symbol != NULL) {
+        HASH_DEL(state.symbolTable, symbol);
+        free(symbol);
+    }
 }
 
 void freeSymbolTable() {

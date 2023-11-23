@@ -8,6 +8,8 @@ boolean symbolExists(char *identifier);
 
 void insertSymbol(char *identifier, DataTypeType type);
 
+void removeSymbol(char *identifier);
+
 void freeSymbolTable();
 
 #endif

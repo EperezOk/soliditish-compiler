@@ -120,6 +120,13 @@ ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *event
 		addError(sprintf(ERR_MSG, "`%s` already exists", eventIdentifier));
 	else
 		insertSymbol(eventIdentifier, DATA_TYPE_EVENT);
+	
+	// Remove parameters from symbol table
+	Parameters *params = eventParams->parameters;
+	while (params != NULL) {
+		removeSymbol(params->identifier);
+		params = params->parameters;
+	}
 
 	ContractInstruction *contractInstruction = calloc(1, sizeof(ContractInstruction));
 	contractInstruction->type = EVENT_DECLARATION;
@@ -448,6 +455,13 @@ ParameterDefinition *ParameterDefinitionGrammarAction(Parameters *parameters) {
 
 Parameters *ParametersGrammarAction(Parameters *parameters, DataType *dataType, char *identifier) {
 	Parameters *params = calloc(1, sizeof(Parameters));
+
+	// Add parameter to symbol table
+	if (symbolExists(identifier))
+		addError(sprintf(ERR_MSG, "Parameter shadows existing identifier `%s`", identifier));
+	else
+		insertSymbol(identifier, dataType->type);
+
 	params->type = parameters == NULL ? PARAMETERS_SINGLE : PARAMETERS_MULTIPLE;
 	params->parameters = parameters;
 	params->dataType = dataType;

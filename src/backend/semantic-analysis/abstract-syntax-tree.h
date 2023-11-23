@@ -200,7 +200,6 @@ struct Assignment{
 	AssignmentType type;
 	Assignable *assignable;
 	Expression *expression;
-	Arguments *arrayElements;
 	FunctionCall *functionCall;
 };
 
