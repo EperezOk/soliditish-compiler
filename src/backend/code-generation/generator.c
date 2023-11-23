@@ -176,6 +176,7 @@ static void generateContractInstruction(ContractInstruction *instruction) {
 	switch (instruction->type) {
 		case STATE_VARIABLE_DECLARATION:
 			generateVariableDefinition(instruction->variableDecorators, instruction->variableDefinition);
+			output(";\n");
 			break;
 		case FUNCTION_DECLARATION:
 			generateFunctionDefinition(instruction->functionDefinition);
@@ -234,8 +235,6 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 
 	if (definition->dataType->type == DATA_TYPE_ERC20) output(")");
 	if (definition->dataType->type == DATA_TYPE_ERC721) output(")");
-
-	output(";\n");
 }
 
 static void generateFunctionCall(FunctionCall *functionCall) {
@@ -356,6 +355,7 @@ static void generateFunctionInstruction(FunctionInstruction *instruction) {
 	switch (instruction->type) {
 		case FUNCTION_INSTRUCTION_VARIABLE_DEFINITION:
 			generateVariableDefinition(NULL, instruction->variableDefinition);
+			output(";\n");
 			break;
 		case FUNCTION_INSTRUCTION_CONDITIONAL:
 			generateConditional(instruction->conditional);
