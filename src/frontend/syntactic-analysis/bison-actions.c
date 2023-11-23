@@ -409,7 +409,8 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 	arrayDataType->dataType = dataType;
 	arrayDataType->expression = expression;
 
-	if (expression != NULL && typeExpression(expression) == -1) 
+	int typeExp = typeExpression(expression);
+	if (expression != NULL && (typeExp == -1 || (typeExp != DATA_TYPE_INT && typeExp != DATA_TYPE_UINT) )) 
 		addError(sprintf(ERR_MSG, "Incorrect dimension in array initialization."));
 	return arrayDataType;
 }

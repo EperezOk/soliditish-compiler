@@ -265,7 +265,7 @@ data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_E
 	| T_ADDRESS																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ADDRESS); }
 	| T_UINT																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_UINT); }
 	| T_INT																		{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_INT); }
-	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET						{ $$ = DataTypeArrayGrammarAction($1, $3); }
+	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = DataTypeArrayGrammarAction($1, $3); }
 	;
 
 function_definition: decorators 
