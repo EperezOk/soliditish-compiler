@@ -1,0 +1,7 @@
+contract Test {
+
+    function test() {
+        uint y = x + 1;
+    }
+
+}

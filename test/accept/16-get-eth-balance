@@ -1,0 +1,8 @@
+contract Test {
+    
+    function test(address who) {
+        uint ethBalance = balance(who);
+        log("Current ETH balance:", ethBalance);
+    }
+
+}

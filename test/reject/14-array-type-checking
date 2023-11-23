@@ -1,0 +1,8 @@
+contract Test {
+
+    function test() {
+        address[3] whitelisted;
+        whitelisted[0] = 1;
+    }
+
+}

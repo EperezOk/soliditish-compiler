@@ -1,0 +1,8 @@
+contract Test {
+
+    function test() {
+        ERC20 token = 0x1A55efc396529724f499748Ecb812405c3035c8D;
+        address token2 = token;
+    }
+
+}
