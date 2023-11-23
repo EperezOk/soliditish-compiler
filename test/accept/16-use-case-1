@@ -1,13 +1,19 @@
-contract TokenMinter {
+contract Wallet {
 
     // Las propiedades son internas por defecto
     ERC20 token = 0x24862BDE3581a23552CE4EE712614550d7aE49FC;
 
     // Las funciones son no-reentrantes e internas por defecto
     @public
-    function mint(address to) {
-       log(“Minting to”, to);
-       token.mint(to, 1e18);
+    function transferToken(address beneficiary, uint amount) {
+       log("Transfering token to:", beneficiary);
+       token.transfer(beneficiary, amount);
+    }
+
+    @public
+    function transferEther(address to) {
+        log("Transfering 1 ETH to:", to);
+        transferEth(to, 1e18);
     }
 
 }
