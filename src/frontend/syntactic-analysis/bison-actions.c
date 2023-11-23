@@ -5,6 +5,7 @@
 #include "../../backend/domain-specific/builtins.h"
 #include "../../backend/semantic-analysis/symbol-table.h"
 #include "../../backend/support/logger.h"
+#include "../../backend/semantic-analysis/type-checking.h"
 #include "bison-actions.h"
 
 #define MAX_ERROR_LENGTH 150
@@ -85,6 +86,9 @@ Conditional *ConditionalGrammarAction(Expression *condition, FunctionBlock *ifBl
 	conditional->condition = condition;
 	conditional->ifBlock = ifBlock;
 	conditional->elseBlock = elseBlock;
+
+	if(typeExpression(condition) != DATA_TYPE_BOOLEAN)
+		addError(sprintf(ERR_MSG, "Condition must be a boolean"));
 	return conditional;
 }
 
@@ -115,7 +119,7 @@ ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *event
 	if (symbolExists(eventIdentifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", eventIdentifier));
 	else
-		insertSymbol(eventIdentifier);
+		insertSymbol(eventIdentifier, DATA_TYPE_EVENT);
 
 	ContractInstruction *contractInstruction = calloc(1, sizeof(ContractInstruction));
 	contractInstruction->type = EVENT_DECLARATION;
@@ -162,12 +166,15 @@ FunctionInstruction *MemberCallFunctionInstructionGrammarAction(MemberCall *memb
 
 FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdentifier, Arguments *eventArgs) {
 	if (!symbolExists(eventIdentifier))
-		addError(sprintf(ERR_MSG, "Event `%s` does not exist", eventIdentifier));
+		addError(sprintf(ERR_MSG, "Error: undefined event `%s`", eventIdentifier));
 
 	FunctionInstruction *functionInstruction = calloc(1, sizeof(FunctionInstruction));
 	functionInstruction->type = FUNCTION_INSTRUCTION_EMIT_EVENT;
 	functionInstruction->eventIdentifier = eventIdentifier;
 	functionInstruction->eventArgs = eventArgs;
+
+	if(typeVariable(eventIdentifier) != DATA_TYPE_EVENT)
+		addError(sprintf(ERR_MSG, "Variable is not an event"));
 	return functionInstruction;	
 }
 
@@ -247,6 +254,9 @@ MathAssignment *IncDecGrammarAction(Assignable *variable, MathAssignmentType typ
 	MathAssignment *mathAssignment = calloc(1, sizeof(MathAssignment));
 	mathAssignment->type = type;
 	mathAssignment->variable = variable;
+
+	if (typeMathAssignment(mathAssignment) == -1)
+		addError(sprintf(ERR_MSG, "Can not apply math operators to variable"));
 	return mathAssignment;
 }
 
@@ -266,6 +276,9 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 	assignment->type = ASSIGNMENT_EXPRESSION;
 	assignment->assignable = assignable;
 	assignment->expression = expression;
+
+	if (typeAssignment(assignment) == -1)
+		addError(sprintf(ERR_MSG, "Invalid assignment to variable"));
 	return assignment;
 }
 
@@ -283,6 +296,10 @@ MathAssignment *MathAssignmentGrammarAction(Assignable *variable, MathAssignment
 	mathAssignment->variable = variable;
 	mathAssignment->operator = operator;
 	mathAssignment->expression = expression;
+
+	if (typeMathAssignment(mathAssignment) == -1)
+		addError(sprintf(ERR_MSG, "Can not apply math operators to variable"));
+
 	return mathAssignment;
 }
 
@@ -305,6 +322,9 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 	
 	functionCall->identifier = identifier;
 	functionCall->arguments = arguments;
+
+	if (typeFunctionCall(functionCall) == -1)
+		addError(sprintf(ERR_MSG, "Variable is not callable"));
 	return functionCall;
 }
 
@@ -326,6 +346,9 @@ MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method) 
 	MemberCall *memberCall = calloc(1, sizeof(MemberCall));
 	memberCall->instance = instance;
 	memberCall->method = method;
+
+	if (typeMemberCall(memberCall) == -1) 
+		addError(sprintf(ERR_MSG, "Invalid function call"));
 	return memberCall;
 }
 
@@ -333,13 +356,17 @@ VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char 
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_EXPRESSION;
 	variableDefinition->dataType = dataType;
 	variableDefinition->identifier = identifier;
 	variableDefinition->expression = expression;
+
+	if (typeVariableDefinition(variableDefinition) == -1) 
+		addError(sprintf(ERR_MSG, "Invalid variable definition"));
+
 	return variableDefinition;
 }
 
@@ -347,7 +374,7 @@ VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, cha
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_FUNCTION_CALL;
@@ -361,7 +388,7 @@ VariableDefinition *VariableDefinitionGrammarAction(DataType *dataType, char *id
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier);
+		insertSymbol(identifier, dataType->type);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_DECLARATION;
@@ -381,6 +408,10 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 	arrayDataType->type = DATA_TYPE_ARRAY;
 	arrayDataType->dataType = dataType;
 	arrayDataType->expression = expression;
+
+	int typeExp = typeExpression(expression);
+	if (expression != NULL && (typeExp == -1 || (typeExp != DATA_TYPE_INT && typeExp != DATA_TYPE_UINT) )) 
+		addError(sprintf(ERR_MSG, "Incorrect dimension in array initialization."));
 	return arrayDataType;
 }
 
@@ -390,7 +421,7 @@ FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, P
 	else if (isBuiltInFunction(id))
 		addError(sprintf(ERR_MSG, "Cannot redeclare built-in function `%s`", id));
 	else
-		insertSymbol(id);
+		insertSymbol(id, DATA_TYPE_FUNCTION);
 
 	FunctionDefinition *functionDefinition = calloc(1, sizeof(FunctionDefinition));
 	functionDefinition->decorators = dec;
@@ -429,6 +460,10 @@ Expression *ExpressionGrammarAction(ExpressionType type, Expression *left, Expre
 	expression->type = type;
 	expression->left = left;
 	expression->right = right;
+
+	if (typeExpression(expression) == -1)
+		addError(sprintf(ERR_MSG, "Operation between incompatible types"));
+
 	return expression;
 }
 

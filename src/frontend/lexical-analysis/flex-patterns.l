@@ -37,15 +37,15 @@ string          \"[^"]*\"
 <LINE_COMMENT>.							    { IgnoredPatternAction(yytext, yyleng); }
 <LINE_COMMENT>{endline}					    { EndCommentPatternAction(); BEGIN(INITIAL); }
 
-"contract"								    { return TokenPatternAction(yytext, CONTRACT); }
-"function"								    { return TokenPatternAction(yytext, FUNCTION); }
+"contract"								    { return CONTRACT; }
+"function"								    { return FUNCTION; }
 
-"event"                                     { return TokenPatternAction(yytext, EVENT); }
-"emit"                                      { return TokenPatternAction(yytext, EMIT); }
+"event"                                     { return EVENT; }
+"emit"                                      { return EMIT; }
 
-"if"                                        { return TokenPatternAction(yytext, IF); }
-"else"                                      { return TokenPatternAction(yytext, ELSE); }
-"for"                                       { return TokenPatternAction(yytext, FOR); }
+"if"                                        { return IF; }
+"else"                                      { return ELSE; }
+"for"                                       { return FOR; }
 
 "ERC20"                                     { return TokenPatternAction(yytext, T_ERC20); }
 "ERC721"                                    { return TokenPatternAction(yytext, T_ERC721); }
@@ -56,40 +56,40 @@ string          \"[^"]*\"
 "uint"                                      { return TokenPatternAction(yytext, T_UINT); }
 "int"                                       { return TokenPatternAction(yytext, T_INT); }
 
-"+"											{ return TokenPatternAction(yytext, ADD); }
-"-"											{ return TokenPatternAction(yytext, SUB); }
-"*"											{ return TokenPatternAction(yytext, MUL); }
-"/"											{ return TokenPatternAction(yytext, DIV); }
-"%"											{ return TokenPatternAction(yytext, MOD); }
-"**"										{ return TokenPatternAction(yytext, EXP); }
+"+"											{ return ADD; }
+"-"											{ return SUB; }
+"*"											{ return MUL; }
+"/"											{ return DIV; }
+"%"											{ return MOD; }
+"**"										{ return EXP; }
 
-"=="										{ return TokenPatternAction(yytext, IS_EQ); }
-"!="										{ return TokenPatternAction(yytext, NEQ); }
-"<"											{ return TokenPatternAction(yytext, LT); }
-"<="										{ return TokenPatternAction(yytext, LTE); }
-">"											{ return TokenPatternAction(yytext, GT); }
-">="										{ return TokenPatternAction(yytext, GTE); }
+"=="										{ return EQ_EQ; }
+"!="										{ return NEQ; }
+"<"											{ return LT; }
+"<="										{ return LTE; }
+">"											{ return GT; }
+">="										{ return GTE; }
 
-"++"                                        { return TokenPatternAction(yytext, INC); }
-"--"                                        { return TokenPatternAction(yytext, DEC); }
-"+="                                        { return TokenPatternAction(yytext, ADD_EQ); }
-"-="                                        { return TokenPatternAction(yytext, SUB_EQ); }
-"*="                                        { return TokenPatternAction(yytext, MUL_EQ); }
-"/="                                        { return TokenPatternAction(yytext, DIV_EQ); }
-"%="                                        { return TokenPatternAction(yytext, MOD_EQ); }
+"++"                                        { return INC; }
+"--"                                        { return DEC; }
+"+="                                        { return ADD_EQ; }
+"-="                                        { return SUB_EQ; }
+"*="                                        { return MUL_EQ; }
+"/="                                        { return DIV_EQ; }
+"%="                                        { return MOD_EQ; }
 
-"&&"										{ return TokenPatternAction(yytext, AND); }
-"||"										{ return TokenPatternAction(yytext, OR); }
-"!"											{ return TokenPatternAction(yytext, NOT); }
+"&&"										{ return AND; }
+"||"										{ return OR; }
+"!"											{ return NOT; }
 
-"{"											{ return TokenPatternAction(yytext, OPEN_CURLY_BRACKET); }
-"}"											{ return TokenPatternAction(yytext, CLOSE_CURLY_BRACKET); }
-"("											{ return TokenPatternAction(yytext, OPEN_PARENTHESIS); }
-")"											{ return TokenPatternAction(yytext, CLOSE_PARENTHESIS); }
-"["											{ return TokenPatternAction(yytext, OPEN_SQUARE_BRACKET); }
-"]"											{ return TokenPatternAction(yytext, CLOSE_SQUARE_BRACKET); }
-","                                         { return TokenPatternAction(yytext, COMMA); }
-"."                                         { return TokenPatternAction(yytext, DOT); }
+"{"											{ return OPEN_CURLY_BRACKET; }
+"}"											{ return CLOSE_CURLY_BRACKET; }
+"("											{ return OPEN_PARENTHESIS; }
+")"											{ return CLOSE_PARENTHESIS; }
+"["											{ return OPEN_SQUARE_BRACKET; }
+"]"											{ return CLOSE_SQUARE_BRACKET; }
+","                                         { return COMMA; }
+"."                                         { return DOT; }
 
 @public                                     { return DecoratorPatternAction(yytext, yyleng); }
 
@@ -104,9 +104,9 @@ string          \"[^"]*\"
 
 {string}                                    { return StringValuePatternAction(yytext, yyleng, STRING); }
 
-"="                                         { return TokenPatternAction(yytext, EQ); }
+"="                                         { return EQ; }
 
-";"                                         { return TokenPatternAction(yytext, SEMI); }
+";"                                         { return SEMI; }
 
 {whitespace}+								{ IgnoredPatternAction(yytext, yyleng); }
 
