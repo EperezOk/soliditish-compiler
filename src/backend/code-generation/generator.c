@@ -233,8 +233,10 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 			break;
 	}
 
-	if (definition->dataType->type == DATA_TYPE_ERC20) output(")");
-	if (definition->dataType->type == DATA_TYPE_ERC721) output(")");
+	if (definition->type != VARIABLE_DEFINITION_DECLARATION) {
+		if (definition->dataType->type == DATA_TYPE_ERC20) output(")");
+		if (definition->dataType->type == DATA_TYPE_ERC721) output(")");
+	}
 }
 
 static void generateFunctionCall(FunctionCall *functionCall) {
