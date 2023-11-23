@@ -64,6 +64,7 @@ add_executable(Compiler
 	src/backend/domain-specific/builtins.c
 	src/backend/support/logger.c
 	src/backend/semantic-analysis/symbol-table.c
+	src/backend/semantic-analysis/type-checking.c
 	src/frontend/lexical-analysis/flex-actions.c
 	src/frontend/lexical-analysis/flex-scanner.c
 	src/frontend/syntactic-analysis/bison-actions.c

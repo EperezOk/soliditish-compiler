@@ -4,6 +4,7 @@
 #include "backend/code-generation/generator.h"
 #include "backend/support/logger.h"
 #include "backend/support/shared.h"
+#include "backend/semantic-analysis/symbol-table.h"
 #include "frontend/syntactic-analysis/bison-parser.h"
 
 extern char *optarg; // avoid IDE warnings

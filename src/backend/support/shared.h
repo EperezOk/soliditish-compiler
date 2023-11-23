@@ -2,9 +2,10 @@
 #define SHARED_HEADER
 
 #include <stdio.h>
+#include "../semantic-analysis/uthash.h"
 
 #include "../semantic-analysis/abstract-syntax-tree.h"
-#include "../semantic-analysis/symbol-table.h"
+
 
 #define MAX_ERRORS 100
 
@@ -35,6 +36,19 @@ extern int yyparse(void);
 
 // El tipo de los tokens emitidos por Flex.
 typedef int token;
+
+typedef enum {
+	false = 0,
+	true = 1
+} boolean;
+
+typedef struct SymbolTableEntry {
+    char *identifier;  // hash key
+    // Add more fields here if needed
+    DataTypeType type;
+    UT_hash_handle hh; // makes this structure hashable
+} SymbolTableEntry;
+
 
 // Estado global de toda la aplicación.
 typedef struct {

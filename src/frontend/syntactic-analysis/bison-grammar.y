@@ -69,7 +69,7 @@
 %token <token> MOD_EQ
 
 // Comparadores
-%token <token> IS_EQ
+%token <token> EQ_EQ
 %token <token> NEQ
 %token <token> LT
 %token <token> LTE
@@ -148,7 +148,7 @@
 %type <constant> constant
 
 // Reglas de asociatividad y precedencia (de menor a mayor).
-%left IS_EQ NEQ LT LTE GT GTE
+%left EQ_EQ NEQ LT LTE GT GTE
 %left AND OR
 %right NOT
 %left ADD SUB // menor precedencia
@@ -224,7 +224,8 @@ assignable: IDENTIFIER															{ $$ = AssignableGrammarAction($1, NULL); }
 	| IDENTIFIER OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET			{ $$ = AssignableGrammarAction($1, $3); }
 
 assignment: assignable EQ expression											{ $$ = AssignmentExpressionGrammarAction($1, $3); }
-	| assignable EQ function_call												{ $$ = AssignmentFunctionCallGrammarAction($1, $3); }
+	// TODO: add support for return types
+	// | assignable EQ function_call												{ $$ = AssignmentFunctionCallGrammarAction($1, $3); }
 	;
 
 math_assignment: assignable math_assignment_operator expression					{ $$ = MathAssignmentGrammarAction($1, $2, $3); }
@@ -252,7 +253,8 @@ member_call: assignable DOT function_call										{ $$ = MemberCallGrammarActio
 
 variable_definition: data_type IDENTIFIER										{ $$ = VariableDefinitionGrammarAction($1, $2); }
 	| data_type IDENTIFIER EQ expression										{ $$ = VariableDefExpressionGrammarAction($1, $2, $4); }
-	| data_type IDENTIFIER EQ function_call										{ $$ = VariableDefFunctionCallGrammarAction($1, $2, $4); }
+	// TODO: add support for return types
+	//| data_type IDENTIFIER EQ function_call										{ $$ = VariableDefFunctionCallGrammarAction($1, $2, $4); }
 	;
 
 data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC20); }
@@ -263,7 +265,7 @@ data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_E
 	| T_ADDRESS																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ADDRESS); }
 	| T_UINT																	{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_UINT); }
 	| T_INT																		{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_INT); }
-	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET						{ $$ = DataTypeArrayGrammarAction($1, $3); }
+	| data_type OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET				{ $$ = DataTypeArrayGrammarAction($1, $3); }
 	;
 
 function_definition: decorators 
@@ -288,7 +290,7 @@ expression: expression[left] ADD expression[right]								{ $$ = ExpressionGramm
 	| expression[left] DIV expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_DIVISION, $left, $right); }
 	| expression[left] MOD expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_MODULO, $left, $right); }
 	| expression[left] EXP expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EXPONENTIATION, $left, $right); }
-	| expression[left] IS_EQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EQUALITY, $left, $right); }
+	| expression[left] EQ_EQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_EQUALITY, $left, $right); }
 	| expression[left] NEQ expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_INEQUALITY, $left, $right); }
 	| expression[left] LT expression[right]										{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN, $left, $right); }
 	| expression[left] LTE expression[right]									{ $$ = ExpressionGrammarAction(EXPRESSION_LESS_THAN_OR_EQUAL, $left, $right); }

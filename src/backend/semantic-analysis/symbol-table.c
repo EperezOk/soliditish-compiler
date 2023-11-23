@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "./symbol-table.h"
-#include "../support/shared.h"
 
 boolean symbolExists(char *identifier) {
     boolean res = false;
@@ -13,10 +12,16 @@ boolean symbolExists(char *identifier) {
     return res;
 }
 
-void insertSymbol(char *identifier) {
-    SymbolTableEntry *symbol = calloc(1, sizeof(SymbolTableEntry));
-    symbol->identifier = identifier;
-    HASH_ADD_KEYPTR(hh, state.symbolTable, symbol->identifier, strlen(identifier), symbol);
+void insertSymbol(char *identifier, DataTypeType type) {
+    SymbolTableEntry *symbol;
+
+    if (!symbolExists(identifier)) {
+        symbol = malloc(sizeof(SymbolTableEntry));
+        symbol->identifier = identifier;
+        symbol->type = type;
+        HASH_ADD_STR(state.symbolTable, identifier, symbol);
+    }
+    
 }
 
 void freeSymbolTable() {
