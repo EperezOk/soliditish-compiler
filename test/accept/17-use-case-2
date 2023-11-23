@@ -2,20 +2,27 @@ contract NFTFactory {
 
     ERC721 nftContract = 0x24862BDE3581a23552CE4EE712614550d7aE49FC;
 
-    event NewCollections(address[5] proxies);
+    event NewCollection(address proxy);
 
     @public
     function deployNewCollections(uint amount) {
         address[amount] newCollections;
 
-        for (uint i = 0; i < amount; i++) {
-            // createProxyTo es una función built-in
-            address tokenClone = createProxyTo(nftContract);
-            log("New Token Clone:", tokenClone);
-            newCollections[i] = tokenClone;
-        }
+        uint i;
 
-        emit NewCollections(newCollections);
+        if (amount > 0) {
+            for (i = 0; i < amount; i++) {
+                // createProxyTo es una función built-in
+                address tokenClone = createProxyTo(nftContract);
+
+                newCollections[i] = tokenClone;
+
+                log("New Token Clone:", newCollections[i]);
+                emit NewCollection(newCollections[i]);
+            }
+        } else {
+            log("Amount must be greater than 0");
+        }
     }
 
 }
