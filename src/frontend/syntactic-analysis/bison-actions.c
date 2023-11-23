@@ -332,6 +332,7 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 
 	if (typeFunctionCall(functionCall) == -1)
 		addError(sprintf(ERR_MSG, "%s is not callable", identifier));
+
 	return functionCall;
 }
 

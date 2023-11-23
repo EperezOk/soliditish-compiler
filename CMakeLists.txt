@@ -65,6 +65,7 @@ add_executable(Compiler
 	src/backend/support/logger.c
 	src/backend/semantic-analysis/symbol-table.c
 	src/backend/semantic-analysis/type-checking.c
+	src/backend/semantic-analysis/abstract-syntax-tree.c
 	src/frontend/lexical-analysis/flex-actions.c
 	src/frontend/lexical-analysis/flex-scanner.c
 	src/frontend/syntactic-analysis/bison-actions.c
