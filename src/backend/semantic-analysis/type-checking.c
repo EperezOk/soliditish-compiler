@@ -105,7 +105,7 @@ int typeVariableDefinition(VariableDefinition *variableDefinition) {
 
     if (variableDefinition->dataType->type == expression)
         return variableDefinition->dataType->type;
-
+    
     switch (variableDefinition->dataType->type) {
         case DATA_TYPE_ADDRESS:
             if (expression == DATA_TYPE_ERC20 || expression == DATA_TYPE_ERC721)
@@ -120,6 +120,9 @@ int typeVariableDefinition(VariableDefinition *variableDefinition) {
                 return -1;
         case DATA_TYPE_BYTES:
             if (expression == DATA_TYPE_STRING)
+                return variableDefinition->dataType->type;
+        case DATA_TYPE_INT:
+            if (expression == DATA_TYPE_UINT)
                 return variableDefinition->dataType->type;
         default:
             return -1;
@@ -178,7 +181,7 @@ int typeExpression(Expression *expression) {
             return -1;
         }
     case EXPRESSION_NOT:
-        if (typeExpression(expression) == DATA_TYPE_BOOLEAN) {
+        if (typeExpression(expression->right) == DATA_TYPE_BOOLEAN) {
             return DATA_TYPE_BOOLEAN;
         }
         else {
@@ -214,7 +217,10 @@ int typeConstant(Constant *constant) {
     case CONSTANT_ADDRESS:
         return DATA_TYPE_ADDRESS;
     case CONSTANT_SCIENTIFIC_NOTATION:
-        return typeInteger(constant->value);
+        if (constant->string[0] == '-')
+            return DATA_TYPE_INT;
+        else
+            return DATA_TYPE_UINT;
     case CONSTANT_VARIABLE:
         return typeAssignable(constant->variable);
     default:
@@ -223,11 +229,14 @@ int typeConstant(Constant *constant) {
 }
 
 int typeAssignable(Assignable *assignable) {
+    int typeArrayIndex = typeExpression(assignable->arrayIndex);
     switch (assignable->type) {
     case ASSIGNABLE_VARIABLE:
         return typeVariable(assignable->identifier);
     case ASSIGNABLE_ARRAY:
-        return typeExpression(assignable->arrayIndex);
+        if (typeArrayIndex == -1 || (typeArrayIndex != DATA_TYPE_INT && typeArrayIndex != DATA_TYPE_UINT))
+            return -1;
+        return typeVariable(assignable->identifier);
     default:
         return -1;
     }
@@ -251,14 +260,5 @@ int typeInteger(int value) {
    } else {
        return DATA_TYPE_UINT;
    }
-}
-
-// TODO: CHECK IF THIS WORKS WITH SCIENTIFIC NOTATION
-int typeScientificNotation(char *string) {
-    // convert from scientific notation to int
-    long long int number;
-    // Use strtoll() to convert scientific notation string to a long long int
-    number = strtoll(string, NULL, 10);
-    return typeInteger((int)number);
 }
 

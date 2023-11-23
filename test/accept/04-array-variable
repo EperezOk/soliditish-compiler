@@ -1,6 +1,4 @@
 contract myContract {
-    ERC20[] tokens;
     ERC20[5] fiveTokens;
-    ERC20[][] tokenMatrix;
     ERC20[3][3] tokenMatrix3x3;
 }

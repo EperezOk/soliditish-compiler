@@ -16,6 +16,5 @@ int typeConstant(Constant * constant);
 int typeAssignable(Assignable * assignable);
 int typeVariable(char * identifier);
 int typeInteger(int value);
-int typeScientificNotation(char * value);
 
 #endif
