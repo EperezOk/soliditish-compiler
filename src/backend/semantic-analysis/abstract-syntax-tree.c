@@ -98,7 +98,7 @@ static void freeParameters(Parameters *parameters) {
 
 static void freeFunctionBlock(FunctionBlock *functionBlock) {
     if (functionBlock == NULL) return;
-    freeFunctionInstructions(functionBlock->instructions);
+    freeFunctionInstructions(functionBlock->instructions); 
     free(functionBlock);
 }
 
@@ -190,6 +190,7 @@ static void freeLoopIteration(LoopIteration *loopIteration) {
 }
 
 static void freeAssignable(Assignable *assignable) {
+    if (assignable == NULL) return;
     freeExpression(assignable->arrayIndex);
     freeIdentifier(assignable->identifier);
     free(assignable);
