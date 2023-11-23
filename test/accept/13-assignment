@@ -1,7 +1,7 @@
 contract TokenMinter {
     function test() {
-        int k = 2;
-        int n = 1;
+        uint k = 2;
+        uint n = 1;
         uint[3] array;
 
         n = k;

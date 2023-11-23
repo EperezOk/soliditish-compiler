@@ -1,6 +1,9 @@
 contract myContract {
-    uint[3] a;
-    a[0] = 1;
-    a[1] = 2;
-    a[2] = 3;
+
+    function test() {
+        uint[3] a;
+        a[0] = 2;
+        a[1] = 2;
+        a[2] = 3;
+    }
 }

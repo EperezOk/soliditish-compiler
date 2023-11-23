@@ -119,7 +119,7 @@ ContractInstruction *EventDefinitionContractInstructionGrammarAction(char *event
 	if (symbolExists(eventIdentifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", eventIdentifier));
 	else
-		insertSymbol(eventIdentifier, DATA_TYPE_EVENT);
+		insertSymbol(eventIdentifier, DATA_TYPE_VOID, SYMBOL_TYPE_EVENT);
 	
 	// Remove parameters from symbol table
 	Parameters *params = eventParams->parameters;
@@ -180,7 +180,7 @@ FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdenti
 	functionInstruction->eventIdentifier = eventIdentifier;
 	functionInstruction->eventArgs = eventArgs;
 
-	if(typeVariable(eventIdentifier) != DATA_TYPE_EVENT)
+	if(getSymbolType(eventIdentifier) != SYMBOL_TYPE_EVENT)
 		addError(sprintf(ERR_MSG, "%s is not an event", eventIdentifier));
 	return functionInstruction;	
 }
@@ -283,7 +283,7 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 	assignment->type = ASSIGNMENT_EXPRESSION;
 	assignment->assignable = assignable;
 	assignment->expression = expression;
-
+	
 	if (typeAssignment(assignment) == -1)
 		addError(sprintf(ERR_MSG, "Invalid assignment to variable"));
 	return assignment;
@@ -362,8 +362,9 @@ MemberCall *MemberCallGrammarAction(Assignable *instance, FunctionCall *method) 
 VariableDefinition *VariableDefExpressionGrammarAction(DataType *dataType, char *identifier, Expression *expression) {
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
-	else
-		insertSymbol(identifier, dataType->type);
+	else {
+		insertSymbol(identifier, dataType->type, SYMBOL_TYPE_VARIABLE);
+	}
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_EXPRESSION;
@@ -381,7 +382,7 @@ VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, cha
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
 	else
-		insertSymbol(identifier, dataType->type);
+		insertSymbol(identifier, dataType->type, SYMBOL_TYPE_VARIABLE);
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_INIT_FUNCTION_CALL;
@@ -394,8 +395,16 @@ VariableDefinition *VariableDefFunctionCallGrammarAction(DataType *dataType, cha
 VariableDefinition *VariableDefinitionGrammarAction(DataType *dataType, char *identifier) {
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "`%s` already exists", identifier));
-	else
-		insertSymbol(identifier, dataType->type);
+	else {
+		if (dataType->type == DATA_TYPE_ARRAY) {
+			DataType *realDataType = dataType;
+			while (realDataType->type == DATA_TYPE_ARRAY)
+				realDataType = realDataType->dataType;
+			insertSymbol(identifier, realDataType->type, SYMBOL_TYPE_ARRAY);
+		} else {
+			insertSymbol(identifier, dataType->type, SYMBOL_TYPE_VARIABLE);
+		}
+	}
 
 	VariableDefinition *variableDefinition = calloc(1, sizeof(VariableDefinition));
 	variableDefinition->type = VARIABLE_DEFINITION_DECLARATION;
@@ -428,7 +437,8 @@ FunctionDefinition *FunctionDefinitionGrammarAction(Decorators *dec, char *id, P
 	else if (isBuiltInFunction(id))
 		addError(sprintf(ERR_MSG, "Cannot redeclare built-in function `%s`", id));
 	else
-		insertSymbol(id, DATA_TYPE_FUNCTION);
+		// TODO: add support for function return types
+		insertSymbol(id, DATA_TYPE_VOID, SYMBOL_TYPE_FUNCTION);
 
 	FunctionDefinition *functionDefinition = calloc(1, sizeof(FunctionDefinition));
 	functionDefinition->decorators = dec;
@@ -459,8 +469,17 @@ Parameters *ParametersGrammarAction(Parameters *parameters, DataType *dataType, 
 	// Add parameter to symbol table
 	if (symbolExists(identifier))
 		addError(sprintf(ERR_MSG, "Parameter shadows existing identifier `%s`", identifier));
-	else
-		insertSymbol(identifier, dataType->type);
+	else {
+		if (dataType->type == DATA_TYPE_ARRAY) {
+			DataType *realDataType = dataType;
+			while (realDataType->type == DATA_TYPE_ARRAY)
+				realDataType = realDataType->dataType;
+
+			insertSymbol(identifier, realDataType->type, SYMBOL_TYPE_ARRAY);
+		} else {
+			insertSymbol(identifier, dataType->type, SYMBOL_TYPE_VARIABLE);
+		}
+	}
 
 	params->type = parameters == NULL ? PARAMETERS_SINGLE : PARAMETERS_MULTIPLE;
 	params->parameters = parameters;

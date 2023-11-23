@@ -12,13 +12,14 @@ boolean symbolExists(char *identifier) {
     return res;
 }
 
-void insertSymbol(char *identifier, DataTypeType type) {
+void insertSymbol(char *identifier, DataTypeType type, SymbolType symbolType) {
     SymbolTableEntry *symbol;
 
     if (!symbolExists(identifier)) {
         symbol = malloc(sizeof(SymbolTableEntry));
         symbol->identifier = identifier;
         symbol->type = type;
+        symbol->symbolType = symbolType;
         HASH_ADD_STR(state.symbolTable, identifier, symbol);
     }
 }
@@ -43,11 +44,22 @@ void freeSymbolTable() {
     }
 }
 
-int getSymbolType(char *identifier) {
+DataTypeType getSymbolDataType(char *identifier) {
     SymbolTableEntry *symbol;
     HASH_FIND_STR(state.symbolTable, identifier, symbol);
     if (symbol != NULL) {
         return symbol->type;
+    }
+    else {
+        return -1;
+    }
+}
+
+SymbolType getSymbolType(char *identifier) {
+    SymbolTableEntry *symbol;
+    HASH_FIND_STR(state.symbolTable, identifier, symbol);
+    if (symbol != NULL) {
+        return symbol->symbolType;
     }
     else {
         return -1;

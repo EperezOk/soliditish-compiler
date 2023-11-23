@@ -6,12 +6,14 @@
 
 boolean symbolExists(char *identifier);
 
-void insertSymbol(char *identifier, DataTypeType type);
+void insertSymbol(char *identifier, DataTypeType type, SymbolType symbolType);
 
 void removeSymbol(char *identifier);
 
 void freeSymbolTable();
 
-int getSymbolType(char *identifier);
+DataTypeType getSymbolDataType(char *identifier);
+
+SymbolType getSymbolType(char *identifier);
 
 #endif

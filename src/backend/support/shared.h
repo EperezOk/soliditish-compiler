@@ -42,10 +42,18 @@ typedef enum {
 	true = 1
 } boolean;
 
+typedef enum {
+	SYMBOL_TYPE_VARIABLE,
+	SYMBOL_TYPE_ARRAY,
+	SYMBOL_TYPE_FUNCTION,
+	SYMBOL_TYPE_EVENT
+} SymbolType;
+
 typedef struct SymbolTableEntry {
     char *identifier;  // hash key
     // Add more fields here if needed
     DataTypeType type;
+	SymbolType symbolType;
     UT_hash_handle hh; // makes this structure hashable
 } SymbolTableEntry;
 

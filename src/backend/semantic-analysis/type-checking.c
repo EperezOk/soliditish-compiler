@@ -64,19 +64,20 @@ int typeFunctionCall(FunctionCall *functionCall) {
         case FUNCTION_CALL_NO_ARGS:
         case FUNCTION_CALL_WITH_ARGS:
             if (isBuiltInFunction(functionCall->identifier))
-                return DATA_TYPE_FUNCTION;
+                return DATA_TYPE_VOID;
 
-            switch (typeVariable(functionCall->identifier)) {
-                case DATA_TYPE_FUNCTION:
-                    return DATA_TYPE_FUNCTION;
+            switch (getSymbolType(functionCall->identifier)) {
+                case SYMBOL_TYPE_FUNCTION:
+                    return DATA_TYPE_VOID;
                 default:
                     return -1;
             }
 	    case BUILT_IN_TRANSFER_ETH:
 	    case BUILT_IN_BALANCE:
 	    case BUILT_IN_LOG:
+            return DATA_TYPE_VOID;
 	    case BUILT_IN_CREATE_PROXY_TO:
-            return DATA_TYPE_FUNCTION;
+            return DATA_TYPE_ADDRESS;
         default:
             return -1;
     }
@@ -133,63 +134,63 @@ int typeExpression(Expression *expression) {
     int leftType = typeExpression(expression->left);
     int rightType = typeExpression(expression->right);
     switch (expression->type) {
-    case EXPRESSION_ADDITION:
-    case EXPRESSION_SUBTRACTION:
-    case EXPRESSION_MULTIPLICATION:
-    case EXPRESSION_DIVISION:
-    case EXPRESSION_MODULO:
-    case EXPRESSION_EXPONENTIATION:
-        if (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_UINT) {
-            return DATA_TYPE_UINT;
-        } else if ((leftType == DATA_TYPE_INT && rightType == DATA_TYPE_INT)
-                    || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)
-                    || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT)){
-            return DATA_TYPE_INT;
-        } else {
-            return -1;
-        }
-    case EXPRESSION_EQUALITY:
-    case EXPRESSION_INEQUALITY:
-        if (leftType == rightType) {
-            return DATA_TYPE_BOOLEAN;
-        }
-        else {
-            return -1;
-        }
-    case EXPRESSION_LESS_THAN:
-    case EXPRESSION_LESS_THAN_OR_EQUAL:
-    case EXPRESSION_GREATER_THAN:
-    case EXPRESSION_GREATER_THAN_OR_EQUAL:
-        if (leftType == rightType || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT) || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)) {
-            if (leftType == DATA_TYPE_UINT || leftType == DATA_TYPE_INT) {
+        case EXPRESSION_ADDITION:
+        case EXPRESSION_SUBTRACTION:
+        case EXPRESSION_MULTIPLICATION:
+        case EXPRESSION_DIVISION:
+        case EXPRESSION_MODULO:
+        case EXPRESSION_EXPONENTIATION:
+            if (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_UINT) {
+                return DATA_TYPE_UINT;
+            } else if ((leftType == DATA_TYPE_INT && rightType == DATA_TYPE_INT)
+                        || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)
+                        || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT)){
+                return DATA_TYPE_INT;
+            } else {
+                return -1;
+            }
+        case EXPRESSION_EQUALITY:
+        case EXPRESSION_INEQUALITY:
+            if (leftType == rightType) {
                 return DATA_TYPE_BOOLEAN;
             }
             else {
                 return -1;
             }
-        }
-        else {
+        case EXPRESSION_LESS_THAN:
+        case EXPRESSION_LESS_THAN_OR_EQUAL:
+        case EXPRESSION_GREATER_THAN:
+        case EXPRESSION_GREATER_THAN_OR_EQUAL:
+            if (leftType == rightType || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT) || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)) {
+                if (leftType == DATA_TYPE_UINT || leftType == DATA_TYPE_INT) {
+                    return DATA_TYPE_BOOLEAN;
+                }
+                else {
+                    return -1;
+                }
+            }
+            else {
+                return -1;
+            }
+        case EXPRESSION_AND:
+        case EXPRESSION_OR:
+            if (leftType == DATA_TYPE_BOOLEAN && rightType == DATA_TYPE_BOOLEAN) {
+                return DATA_TYPE_BOOLEAN;
+            }
+            else {
+                return -1;
+            }
+        case EXPRESSION_NOT:
+            if (typeExpression(expression->right) == DATA_TYPE_BOOLEAN) {
+                return DATA_TYPE_BOOLEAN;
+            }
+            else {
+                return -1;
+            }
+        case EXPRESSION_FACTOR:
+            return typeFactor(expression->factor);
+        default:
             return -1;
-        }
-    case EXPRESSION_AND:
-    case EXPRESSION_OR:
-        if (leftType == DATA_TYPE_BOOLEAN && rightType == DATA_TYPE_BOOLEAN) {
-            return DATA_TYPE_BOOLEAN;
-        }
-        else {
-            return -1;
-        }
-    case EXPRESSION_NOT:
-        if (typeExpression(expression->right) == DATA_TYPE_BOOLEAN) {
-            return DATA_TYPE_BOOLEAN;
-        }
-        else {
-            return -1;
-        }
-    case EXPRESSION_FACTOR:
-        return typeFactor(expression->factor);
-    default:
-        return -1;
     }
 }
 
@@ -207,42 +208,45 @@ int typeFactor(Factor *factor) {
 
 int typeConstant(Constant *constant) {
     switch (constant->type) {
-    case CONSTANT_INTEGER:
-        return typeInteger(constant->value);
-    case CONSTANT_BOOLEAN:
-        return DATA_TYPE_BOOLEAN;
-    case CONSTANT_STRING:
-        return DATA_TYPE_STRING;
-    case CONSTANT_ADDRESS:
-        return DATA_TYPE_ADDRESS;
-    case CONSTANT_SCIENTIFIC_NOTATION:
-        if (constant->string[0] == '-')
-            return DATA_TYPE_INT;
-        else
-            return DATA_TYPE_UINT;
-    case CONSTANT_VARIABLE:
-        return typeAssignable(constant->variable);
-    default:
-        return -1;
+        case CONSTANT_INTEGER:
+            return typeInteger(constant->value);
+        case CONSTANT_BOOLEAN:
+            return DATA_TYPE_BOOLEAN;
+        case CONSTANT_STRING:
+            return DATA_TYPE_STRING;
+        case CONSTANT_ADDRESS:
+            return DATA_TYPE_ADDRESS;
+        case CONSTANT_SCIENTIFIC_NOTATION:
+            if (constant->string[0] == '-')
+                return DATA_TYPE_INT;
+            else
+                return DATA_TYPE_UINT;
+        case CONSTANT_VARIABLE:
+            return typeAssignable(constant->variable);
+        default:
+            return -1;
     }
 }
 
 int typeAssignable(Assignable *assignable) {
     int typeArrayIndex = typeExpression(assignable->arrayIndex);
     switch (assignable->type) {
-    case ASSIGNABLE_VARIABLE:
-        return typeVariable(assignable->identifier);
-    case ASSIGNABLE_ARRAY:
-        if (typeArrayIndex == -1 || typeArrayIndex != DATA_TYPE_UINT)
+        case ASSIGNABLE_VARIABLE:
+            return typeVariable(assignable->identifier);
+        case ASSIGNABLE_ARRAY:
+            if (typeArrayIndex == -1 || typeArrayIndex != DATA_TYPE_UINT)
+                return -1;
+
+            if (getSymbolType(assignable->identifier) != SYMBOL_TYPE_ARRAY)
+                return -1;
+            return getSymbolDataType(assignable->identifier);
+        default:
             return -1;
-        return typeVariable(assignable->identifier);
-    default:
-        return -1;
     }
 }
 
 int typeVariable(char *identifier) {
-    return getSymbolType(identifier);
+    return getSymbolDataType(identifier);
 }
 
 // check if it is string (scientificc notation), uint or int
