@@ -33,6 +33,10 @@ typedef struct Expression Expression;
 typedef struct Factor Factor;
 typedef struct Constant Constant;
 
+// Methods
+
+void freeAST(Program *program);
+
 // Nodes
 
 struct Program{

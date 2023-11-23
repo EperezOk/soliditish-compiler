@@ -114,4 +114,5 @@ void parseCliOptions(int argc, char *argv[], char *outFileName) {
 
 void freeResources() {
 	freeSymbolTable();
+	freeAST(state.program);
 }
