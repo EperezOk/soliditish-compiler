@@ -218,11 +218,11 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 		output(")");
 	}
 
-	if (definition->type != VARIABLE_DEFINITION_DECLARATION)
+	if (definition->type != VARIABLE_DEFINITION_DECLARATION) {
 		output(" = ");
-
-	if (definition->dataType->type == DATA_TYPE_ERC20) output("IERC20(");
-	if (definition->dataType->type == DATA_TYPE_ERC721) output("IERC721(");
+		if (definition->dataType->type == DATA_TYPE_ERC20) output("IERC20(");
+		if (definition->dataType->type == DATA_TYPE_ERC721) output("IERC721(");
+	}
 	
 	switch(definition->type) {
 		case VARIABLE_DEFINITION_INIT_EXPRESSION:
