@@ -224,8 +224,7 @@ assignable: IDENTIFIER															{ $$ = AssignableGrammarAction($1, NULL); }
 	| IDENTIFIER OPEN_SQUARE_BRACKET expression CLOSE_SQUARE_BRACKET			{ $$ = AssignableGrammarAction($1, $3); }
 
 assignment: assignable EQ expression											{ $$ = AssignmentExpressionGrammarAction($1, $3); }
-	// TODO: add support for return types
-	// | assignable EQ function_call												{ $$ = AssignmentFunctionCallGrammarAction($1, $3); }
+	| assignable EQ function_call												{ $$ = AssignmentFunctionCallGrammarAction($1, $3); }
 	;
 
 math_assignment: assignable math_assignment_operator expression					{ $$ = MathAssignmentGrammarAction($1, $2, $3); }
@@ -253,8 +252,7 @@ member_call: assignable DOT function_call										{ $$ = MemberCallGrammarActio
 
 variable_definition: data_type IDENTIFIER										{ $$ = VariableDefinitionGrammarAction($1, $2); }
 	| data_type IDENTIFIER EQ expression										{ $$ = VariableDefExpressionGrammarAction($1, $2, $4); }
-	// TODO: add support for return types
-	//| data_type IDENTIFIER EQ function_call										{ $$ = VariableDefFunctionCallGrammarAction($1, $2, $4); }
+	| data_type IDENTIFIER EQ function_call										{ $$ = VariableDefFunctionCallGrammarAction($1, $2, $4); }
 	;
 
 data_type: T_ERC20																{ $$ = DataTypeSimpleGrammarAction(DATA_TYPE_ERC20); }
