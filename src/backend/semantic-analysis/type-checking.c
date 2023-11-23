@@ -11,7 +11,9 @@ int typeAssignment(Assignment *assignment) {
                                         || (assignable == DATA_TYPE_ERC721 && expression == DATA_TYPE_ADDRESS)
                                         || (assignable == DATA_TYPE_ADDRESS && expression == DATA_TYPE_ERC20)
                                         || (assignable == DATA_TYPE_ADDRESS && expression == DATA_TYPE_ERC721)
-                                        || (assignable == DATA_TYPE_BYTES && expression == DATA_TYPE_STRING)) {
+                                        || (assignable == DATA_TYPE_BYTES && expression == DATA_TYPE_STRING)
+                                        || (assignable == DATA_TYPE_INT && expression == DATA_TYPE_UINT)
+                                        || (assignable == DATA_TYPE_UINT && expression == DATA_TYPE_INT)) {
                 return assignable;
             } else {
                 return -1;
@@ -140,14 +142,11 @@ int typeExpression(Expression *expression) {
     case EXPRESSION_MULTIPLICATION:
     case EXPRESSION_DIVISION:
     case EXPRESSION_MODULO:
+    case EXPRESSION_EXPONENTIATION:
         if (left_type == DATA_TYPE_UINT && right_type == DATA_TYPE_UINT) {
             return DATA_TYPE_UINT;
-        }
-        else if (left_type == DATA_TYPE_INT && right_type == DATA_TYPE_INT) {
+        } else {
             return DATA_TYPE_INT;
-        }
-        else {
-            return -1;
         }
     case EXPRESSION_EQUALITY:
     case EXPRESSION_INEQUALITY:
@@ -161,7 +160,7 @@ int typeExpression(Expression *expression) {
     case EXPRESSION_LESS_THAN_OR_EQUAL:
     case EXPRESSION_GREATER_THAN:
     case EXPRESSION_GREATER_THAN_OR_EQUAL:
-        if (left_type == right_type) {
+        if (left_type == right_type || (left_type == DATA_TYPE_INT && right_type == DATA_TYPE_UINT) || (left_type == DATA_TYPE_UINT && right_type == DATA_TYPE_INT)) {
             if (left_type == DATA_TYPE_UINT || left_type == DATA_TYPE_INT) {
                 return DATA_TYPE_BOOLEAN;
             }

@@ -3,7 +3,6 @@ contract TokenMinter {
     ERC20 token = 0x24862BDE3581a23552CE4EE712614550d7aE49FC;
 
     @public
-    @reentrant
     function test() {
 
     }

@@ -2,7 +2,7 @@ contract TokenMinter {
     function test() {
         int k = 2;
         int n = 1;
-        uint[] array = [1,2,3];
+        uint[3] array;
 
         n = k;
         n = 4;
