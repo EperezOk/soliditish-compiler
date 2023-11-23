@@ -1,0 +1,7 @@
+contract Test {
+    
+    function test(address to, uint amount) {
+        transferEth(to, amount);
+    }
+
+}

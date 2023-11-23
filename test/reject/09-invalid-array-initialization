@@ -1,5 +1,0 @@
-contract myContract {
-
-    uint[] b = [1,,3];
-
-}

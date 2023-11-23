@@ -1,6 +1,7 @@
 contract TokenMinter {
     function test() {
-        ERC20 bob = 0x1A55efc396529724f499748Ecb812405c3035c8D;
-        bob.transfer(100);
+        address owner = 0x1A55efc396529724f499748Ecb812405c3035c8D;
+        ERC20 token = 0x2345efc396529724f499748Ecb812405c3035c7E;
+        token.transfer(bob, 100);
     }
 }
