@@ -191,6 +191,16 @@ static void generateContractInstruction(ContractInstruction *instruction) {
 static void generateVariableDefinition(Decorators *decorators, VariableDefinition *definition) {
 	generateDataType(definition->dataType);
 
+	if (decorators == NULL) {
+		switch (definition->dataType->type) {
+			case DATA_TYPE_BYTES:
+			case DATA_TYPE_STRING:
+			case DATA_TYPE_ARRAY:
+				output(" memory");
+				break;
+		}
+	}
+
 	// State variables will be internal by default, if not specified otherwise with a decorator
 	while (decorators != NULL && decorators->decorator != NULL) {
 		output(" %s", decorators->decorator);
@@ -199,8 +209,19 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 
 	output(" %s", definition->identifier);
 
+	if (definition->dataType->type == DATA_TYPE_ARRAY) {
+		output(" = new ");
+		generateDataType(definition->dataType);
+		output("(");
+		generateExpression(definition->dataType->expression); // array size
+		output(")");
+	}
+
 	if (definition->type != VARIABLE_DEFINITION_DECLARATION)
 		output(" = ");
+
+	if (definition->dataType->type == DATA_TYPE_ERC20) output("IERC20(");
+	if (definition->dataType->type == DATA_TYPE_ERC721) output("IERC721(");
 	
 	switch(definition->type) {
 		case VARIABLE_DEFINITION_INIT_EXPRESSION:
@@ -210,6 +231,9 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 			generateFunctionCall(definition->functionCall);
 			break;
 	}
+
+	if (definition->dataType->type == DATA_TYPE_ERC20) output(")");
+	if (definition->dataType->type == DATA_TYPE_ERC721) output(")");
 
 	output(";\n");
 }
@@ -239,11 +263,11 @@ static void generateFunctionCall(FunctionCall *functionCall) {
 
 			if (amountArg->expression->factor->constant->type == CONSTANT_INTEGER) {
 				int amount = amountArg->expression->factor->constant->value;
-				output("address(%s).call{value: %d}();\n", address, amount);
+				output("address(%s).call{value: %d}(\"\");\n", address, amount);
 			}
 			else if (amountArg->expression->factor->constant->type == CONSTANT_SCIENTIFIC_NOTATION) {
 				char *amount = amountArg->expression->factor->constant->string;
-				output("address(%s).call{value: %s}();\n", address, amount);
+				output("address(%s).call{value: %s}(\"\");\n", address, amount);
 			}
 
 			output("require(s, \"ETH transfer failed\")");
@@ -435,11 +459,6 @@ static void generateAssignment(Assignment *assignment) {
 		case ASSIGNMENT_FUNCTION_CALL:
 			generateFunctionCall(assignment->functionCall);
 			break;
-		case ASSIGNMENT_ARRAY_INITIALIZATION:
-			output("[");
-			generateArguments(assignment->arrayElements);
-			output("]");
-			break;
 	}
 }
 
@@ -489,14 +508,9 @@ static void generateParameters(Parameters *params) {
 }
 
 static void generateDataType(DataType *dataType) {
-	if (dataType->type == DATA_TYPE_DYNAMIC_ARRAY) {
+	if (dataType->type == DATA_TYPE_ARRAY) {
 		generateDataType(dataType->dataType);
 		output("[]");
-	} else if (dataType->type == DATA_TYPE_STATIC_ARRAY) {
-		generateDataType(dataType->dataType);
-		output("[");
-		generateExpression(dataType->expression);
-		output("]");
 	} else {
 		switch (dataType->type) {
 			case DATA_TYPE_ERC20:

@@ -147,7 +147,6 @@ typedef struct Assignable {
 
 typedef enum {
 	ASSIGNMENT_EXPRESSION,
-	ASSIGNMENT_ARRAY_INITIALIZATION,
 	ASSIGNMENT_FUNCTION_CALL,
 } AssignmentType;
 
@@ -239,8 +238,7 @@ typedef enum {
 	DATA_TYPE_ADDRESS,
 	DATA_TYPE_UINT,
 	DATA_TYPE_INT,
-	DATA_TYPE_DYNAMIC_ARRAY,
-	DATA_TYPE_STATIC_ARRAY
+	DATA_TYPE_ARRAY
 } DataTypeType;
 
 typedef struct DataType {

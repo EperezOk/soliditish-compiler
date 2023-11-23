@@ -269,14 +269,6 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 	return assignment;
 }
 
-Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements) {
-	Assignment *assignment = calloc(1, sizeof(Assignment));
-	assignment->type = ASSIGNMENT_ARRAY_INITIALIZATION;
-	assignment->assignable = assignable;
-	assignment->arrayElements = arrayElements;
-	return assignment;
-}
-
 Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall) {
 	Assignment *assignment = calloc(1, sizeof(Assignment));
 	assignment->type = ASSIGNMENT_FUNCTION_CALL;
@@ -386,7 +378,7 @@ DataType *DataTypeSimpleGrammarAction(DataTypeType type) {
 
 DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression) {
 	DataType *arrayDataType = calloc(1, sizeof(DataType));	
-	arrayDataType->type = expression == NULL ? DATA_TYPE_DYNAMIC_ARRAY : DATA_TYPE_STATIC_ARRAY;
+	arrayDataType->type = DATA_TYPE_ARRAY;
 	arrayDataType->dataType = dataType;
 	arrayDataType->expression = expression;
 	return arrayDataType;
