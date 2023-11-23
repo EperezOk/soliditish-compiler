@@ -16,9 +16,6 @@ int typeAssignment(Assignment *assignment) {
             } else {
                 return -1;
             }
-	    case ASSIGNMENT_ARRAY_INITIALIZATION:
-            // TODO: check that all elements are of type assignable
-            return 0;
         default:
             return -1;
     }

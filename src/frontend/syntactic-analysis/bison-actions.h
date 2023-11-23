@@ -48,7 +48,6 @@ LoopIteration *LoopIterationMathAssignmentGrammarAction(MathAssignment *mathAssi
 Assignable *AssignableGrammarAction(char *identifier, Expression *arrayIndex);
 
 Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression *expression);
-Assignment *AssignmentArrayInitGrammarAction(Assignable *assignable, Arguments *arrayElements);
 Assignment *AssignmentFunctionCallGrammarAction(Assignable *assignable, FunctionCall *functionCall);
 
 MathAssignment *MathAssignmentGrammarAction(Assignable *variable, MathAssignmentOperator *operator, Expression *expression);

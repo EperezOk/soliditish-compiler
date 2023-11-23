@@ -88,6 +88,7 @@ static void includeDependencies(Program *program) {
 	boolean hasERC20 = false;
 	boolean hasERC721 = false;
 	boolean hasConsoleLog = false;
+	boolean hasCreateProxyTo = false;
 	boolean allImportsAdded = false;
 
 	ContractInstructions *contractInstructions = program->contract->block->instructions;
@@ -116,6 +117,7 @@ static void includeDependencies(Program *program) {
 							FunctionCall *functionCall = functionInstruction->functionCall;
 
 							if (functionCall->type == BUILT_IN_LOG) hasConsoleLog = true;
+							else if (functionCall->type == BUILT_IN_CREATE_PROXY_TO) hasCreateProxyTo = true;
 
 							break;
 						}
@@ -125,12 +127,18 @@ static void includeDependencies(Program *program) {
 							if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
 							else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
 
+							if (functionInstruction->variableDefinition->type == VARIABLE_DEFINITION_INIT_FUNCTION_CALL) {
+								FunctionCall *functionCall = functionInstruction->variableDefinition->functionCall;
+
+								if (functionCall->type == BUILT_IN_CREATE_PROXY_TO) hasCreateProxyTo = true;
+							}
+
 							break;
 						}
 					}
 
 					functionInstructions = functionInstructions->instructions;
-					allImportsAdded = hasERC20 && hasERC721 && hasConsoleLog;
+					allImportsAdded = hasERC20 && hasERC721 && hasConsoleLog && hasCreateProxyTo;
 				}
 				break;
 			}
@@ -142,6 +150,7 @@ static void includeDependencies(Program *program) {
 	output("import \"@openzeppelin/contracts/utils/ReentrancyGuard.sol\";\n"); // public functions are nonReentrant
 	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
 	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
+	if (hasCreateProxyTo) output("import \"@openzeppelin/contracts/proxy/Clones.sol\";\n");
 	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
 
 	output("\n");
@@ -182,6 +191,16 @@ static void generateContractInstruction(ContractInstruction *instruction) {
 static void generateVariableDefinition(Decorators *decorators, VariableDefinition *definition) {
 	generateDataType(definition->dataType);
 
+	if (decorators == NULL) {
+		switch (definition->dataType->type) {
+			case DATA_TYPE_BYTES:
+			case DATA_TYPE_STRING:
+			case DATA_TYPE_ARRAY:
+				output(" memory");
+				break;
+		}
+	}
+
 	// State variables will be internal by default, if not specified otherwise with a decorator
 	while (decorators != NULL && decorators->decorator != NULL) {
 		output(" %s", decorators->decorator);
@@ -190,8 +209,19 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 
 	output(" %s", definition->identifier);
 
+	if (definition->dataType->type == DATA_TYPE_ARRAY) {
+		output(" = new ");
+		generateDataType(definition->dataType);
+		output("(");
+		generateExpression(definition->dataType->expression); // array size
+		output(")");
+	}
+
 	if (definition->type != VARIABLE_DEFINITION_DECLARATION)
 		output(" = ");
+
+	if (definition->dataType->type == DATA_TYPE_ERC20) output("IERC20(");
+	if (definition->dataType->type == DATA_TYPE_ERC721) output("IERC721(");
 	
 	switch(definition->type) {
 		case VARIABLE_DEFINITION_INIT_EXPRESSION:
@@ -201,6 +231,9 @@ static void generateVariableDefinition(Decorators *decorators, VariableDefinitio
 			generateFunctionCall(definition->functionCall);
 			break;
 	}
+
+	if (definition->dataType->type == DATA_TYPE_ERC20) output(")");
+	if (definition->dataType->type == DATA_TYPE_ERC721) output(")");
 
 	output(";\n");
 }
@@ -226,34 +259,35 @@ static void generateFunctionCall(FunctionCall *functionCall) {
 			else
 				address = addressArg->expression->factor->constant->variable->identifier;
 
+			output("(bool s, ) = ");
+
 			if (amountArg->expression->factor->constant->type == CONSTANT_INTEGER) {
 				int amount = amountArg->expression->factor->constant->value;
-				output("address(%s).call{value: %d}()", address, amount);
+				output("address(%s).call{value: %d}(\"\");\n", address, amount);
 			}
 			else if (amountArg->expression->factor->constant->type == CONSTANT_SCIENTIFIC_NOTATION) {
 				char *amount = amountArg->expression->factor->constant->string;
-				output("address(%s).call{value: %s}()", address, amount);
+				output("address(%s).call{value: %s}(\"\");\n", address, amount);
 			}
+
+			output("require(s, \"ETH transfer failed\")");
 			break;
 		}
-		case BUILT_IN_BALANCE: {
-			Constant *addressArg = functionCall->arguments->expression->factor->constant;
-			char *address;
-
-			if (addressArg->type == CONSTANT_ADDRESS)
-				address = addressArg->string;
-			else if (addressArg->type == CONSTANT_VARIABLE)
-				address = addressArg->variable->identifier;
-
-			output("address(%s).balance", address);
+		case BUILT_IN_BALANCE:
+			output("address(");
+			generateArguments(functionCall->arguments);
+			output(").balance");
 			break;
-		}
 		case BUILT_IN_LOG:
 			output("console.log(");
 			generateArguments(functionCall->arguments);
 			output(")");
 			break;
-		// TODO: handle missing built-ins
+		case BUILT_IN_CREATE_PROXY_TO:
+			output("Clones.clone(");
+			generateArguments(functionCall->arguments);
+			output(")");
+			break;
 	}
 }
 
@@ -425,11 +459,6 @@ static void generateAssignment(Assignment *assignment) {
 		case ASSIGNMENT_FUNCTION_CALL:
 			generateFunctionCall(assignment->functionCall);
 			break;
-		case ASSIGNMENT_ARRAY_INITIALIZATION:
-			output("[");
-			generateArguments(assignment->arrayElements);
-			output("]");
-			break;
 	}
 }
 
@@ -479,14 +508,9 @@ static void generateParameters(Parameters *params) {
 }
 
 static void generateDataType(DataType *dataType) {
-	if (dataType->type == DATA_TYPE_DYNAMIC_ARRAY) {
+	if (dataType->type == DATA_TYPE_ARRAY) {
 		generateDataType(dataType->dataType);
 		output("[]");
-	} else if (dataType->type == DATA_TYPE_STATIC_ARRAY) {
-		generateDataType(dataType->dataType);
-		output("[");
-		generateExpression(dataType->expression);
-		output("]");
 	} else {
 		switch (dataType->type) {
 			case DATA_TYPE_ERC20:
