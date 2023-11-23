@@ -24,6 +24,8 @@ const FunctionCallType BUILT_IN_FUNCTION_TYPES[] = {
 boolean isBuiltInFunction(char *name) {
     for (int i = 0; i < sizeof(BUILT_IN_FUNCTIONS) / sizeof(char *); ++i) {
         if (strcmp(BUILT_IN_FUNCTIONS[i], name) == 0) {
+            if (strcmp("createProxyTo", name) == 0) state.libraries[LIBRARY_CLONES] = true;
+            else if (strcmp("log", name) == 0) state.libraries[LIBRARY_CONSOLE] = true;
             return true;
         }
     }

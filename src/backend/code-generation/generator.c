@@ -85,73 +85,12 @@ static void includeDependencies(Program *program) {
 	output("// SPDX-License-Identifier: MIT\n");
 	output("pragma solidity ^0.8.0;\n\n");
 
-	boolean hasERC20 = false;
-	boolean hasERC721 = false;
-	boolean hasConsoleLog = false;
-	boolean hasCreateProxyTo = false;
-	boolean allImportsAdded = false;
-
-	ContractInstructions *contractInstructions = program->contract->block->instructions;
-
-	// Search for required imports, traversing the AST
-	while (contractInstructions->type != CONTRACT_INSTRUCTIONS_EMPTY && !allImportsAdded) {
-		ContractInstruction *contractInstruction = contractInstructions->instruction;
-
-		switch (contractInstruction->type) {
-			case STATE_VARIABLE_DECLARATION: {
-				DataType *dataType = contractInstruction->variableDefinition->dataType;
-
-				if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
-				else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
-
-				break;
-			}
-			case FUNCTION_DECLARATION: {
-				FunctionInstructions *functionInstructions = contractInstruction->functionDefinition->functionBlock->instructions;
-				
-				while (functionInstructions->type != FUNCTION_INSTRUCTIONS_EMPTY && !allImportsAdded) {
-					FunctionInstruction *functionInstruction = functionInstructions->instruction;
-
-					switch (functionInstruction->type) {
-						case FUNCTION_INSTRUCTION_FUNCTION_CALL: {
-							FunctionCall *functionCall = functionInstruction->functionCall;
-
-							if (functionCall->type == BUILT_IN_LOG) hasConsoleLog = true;
-							else if (functionCall->type == BUILT_IN_CREATE_PROXY_TO) hasCreateProxyTo = true;
-
-							break;
-						}
-						case FUNCTION_INSTRUCTION_VARIABLE_DEFINITION: {
-							DataType *dataType = functionInstruction->variableDefinition->dataType;
-
-							if (dataType->type == DATA_TYPE_ERC20) hasERC20 = true;
-							else if (dataType->type == DATA_TYPE_ERC721) hasERC721 = true;
-
-							if (functionInstruction->variableDefinition->type == VARIABLE_DEFINITION_INIT_FUNCTION_CALL) {
-								FunctionCall *functionCall = functionInstruction->variableDefinition->functionCall;
-
-								if (functionCall->type == BUILT_IN_CREATE_PROXY_TO) hasCreateProxyTo = true;
-							}
-
-							break;
-						}
-					}
-
-					functionInstructions = functionInstructions->instructions;
-					allImportsAdded = hasERC20 && hasERC721 && hasConsoleLog && hasCreateProxyTo;
-				}
-				break;
-			}
-		}
-		contractInstructions = contractInstructions->instructions;
-	}
-
 	// Add imports
 	output("import \"@openzeppelin/contracts/utils/ReentrancyGuard.sol\";\n"); // public functions are nonReentrant
-	if (hasERC20) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
-	if (hasERC721) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
-	if (hasCreateProxyTo) output("import \"@openzeppelin/contracts/proxy/Clones.sol\";\n");
-	if (hasConsoleLog) output("import \"forge-std/console.sol\";\n");
+	if (state.libraries[LIBRARY_ERC20]) output("import \"@openzeppelin/contracts/token/ERC20/IERC20.sol\";\n");
+	if (state.libraries[LIBRARY_ERC721]) output("import \"@openzeppelin/contracts/token/ERC721/IERC721.sol\";\n");
+	if (state.libraries[LIBRARY_CLONES]) output("import \"@openzeppelin/contracts/proxy/Clones.sol\";\n");
+	if (state.libraries[LIBRARY_CONSOLE]) output("import \"forge-std/console.sol\";\n");
 
 	output("\n");
 }
@@ -285,9 +224,9 @@ static void generateFunctionCall(FunctionCall *functionCall) {
 			output(")");
 			break;
 		case BUILT_IN_CREATE_PROXY_TO:
-			output("Clones.clone(");
+			output("Clones.clone(address(");
 			generateArguments(functionCall->arguments);
-			output(")");
+			output("))");
 			break;
 	}
 }

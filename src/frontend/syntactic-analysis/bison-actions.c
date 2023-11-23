@@ -283,7 +283,7 @@ Assignment *AssignmentExpressionGrammarAction(Assignable *assignable, Expression
 	assignment->type = ASSIGNMENT_EXPRESSION;
 	assignment->assignable = assignable;
 	assignment->expression = expression;
-	
+
 	if (typeAssignment(assignment) == -1)
 		addError(sprintf(ERR_MSG, "Invalid assignment to variable"));
 	return assignment;

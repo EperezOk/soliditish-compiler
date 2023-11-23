@@ -21,6 +21,9 @@ void insertSymbol(char *identifier, DataTypeType type, SymbolType symbolType) {
         symbol->type = type;
         symbol->symbolType = symbolType;
         HASH_ADD_STR(state.symbolTable, identifier, symbol);
+        
+		if (type == DATA_TYPE_ERC20) state.libraries[LIBRARY_ERC20] = true;
+		if (type == DATA_TYPE_ERC721) state.libraries[LIBRARY_ERC721] = true;
     }
 }
 

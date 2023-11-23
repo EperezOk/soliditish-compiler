@@ -8,6 +8,7 @@
 
 
 #define MAX_ERRORS 100
+#define MAX_IMPORTS 20
 
 // Descriptor del archivo de entrada que utiliza Bison.
 extern FILE * yyin;
@@ -57,6 +58,12 @@ typedef struct SymbolTableEntry {
     UT_hash_handle hh; // makes this structure hashable
 } SymbolTableEntry;
 
+typedef enum {
+	LIBRARY_ERC20,
+	LIBRARY_ERC721,
+	LIBRARY_CLONES,
+	LIBRARY_CONSOLE
+} Library;
 
 // Estado global de toda la aplicación.
 typedef struct {
@@ -75,6 +82,8 @@ typedef struct {
 	// Agregar un array para guardar los errores.
 	char *errors[MAX_ERRORS];
 	int errorCount;
+
+	boolean libraries[MAX_IMPORTS];
 
 	// Agregar una pila para manipular scopes.
 } CompilerState;
