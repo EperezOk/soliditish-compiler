@@ -26,8 +26,8 @@ static void generateFunctionDefinition(FunctionDefinition *definition);
 static void generateFunctionBlock(FunctionBlock *block);
 static void generateFunctionInstructions(FunctionInstructions *instructions);
 static void generateFunctionInstruction(FunctionInstruction *instruction);
-static void generateParameterDefinition(ParameterDefinition *definition);
-static void generateParameters(Parameters *params);
+static void generateParameterDefinition(ParameterDefinition *definition, boolean addMemoryLoc);
+static void generateParameters(Parameters *params, boolean addMemoryLoc);
 static void generateDataType(DataType *dataType);
 static void generateExpression(Expression *expression);
 static void generateFactor(Factor *factor);
@@ -182,7 +182,7 @@ static void generateContractInstruction(ContractInstruction *instruction) {
 			break;
 		case EVENT_DECLARATION:
 			output("event %s", instruction->eventIdentifier);
-			generateParameterDefinition(instruction->eventParams);
+			generateParameterDefinition(instruction->eventParams, false);
 			output(";\n");
 			break;
 	}
@@ -308,7 +308,7 @@ static void generateArguments(Arguments *arguments) {
 
 static void generateFunctionDefinition(FunctionDefinition *function) {
 	output("function %s", function->identifier);
-	generateParameterDefinition(function->parameterDefinition);
+	generateParameterDefinition(function->parameterDefinition, true);
 
 	boolean isPublic = false;
 
@@ -329,11 +329,11 @@ static void generateFunctionDefinition(FunctionDefinition *function) {
 	generateFunctionBlock(function->functionBlock);
 }
 
-static void generateParameterDefinition(ParameterDefinition *definition) {
+static void generateParameterDefinition(ParameterDefinition *definition, boolean addMemoryLoc) {
 	output("(");
 
 	if (definition->type == PARAMETERS_DEFINITION_WITH_PARAMS)
-		generateParameters(definition->parameters);
+		generateParameters(definition->parameters, addMemoryLoc);
 
 	output(")");
 }
@@ -498,12 +498,23 @@ static void generateMathAssignmentOperator(MathAssignmentOperator *operator) {
 	}
 }
 
-static void generateParameters(Parameters *params) {
+static void generateParameters(Parameters *params, boolean addMemoryLoc) {
 	if (params->type == PARAMETERS_MULTIPLE) {
-		generateParameters(params->parameters);
+		generateParameters(params->parameters, addMemoryLoc);
 		output(", ");
 	}
 	generateDataType(params->dataType);
+
+	if (addMemoryLoc) {
+		switch (params->dataType->type) {
+			case DATA_TYPE_BYTES:
+			case DATA_TYPE_STRING:
+			case DATA_TYPE_ARRAY:
+				output(" memory");
+				break;
+		}
+	}
+
 	output(" %s", params->identifier);
 }
 
