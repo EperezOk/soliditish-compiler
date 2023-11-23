@@ -42,3 +42,14 @@ void freeSymbolTable() {
         free(symbol);
     }
 }
+
+int getSymbolType(char *identifier) {
+    SymbolTableEntry *symbol;
+    HASH_FIND_STR(state.symbolTable, identifier, symbol);
+    if (symbol != NULL) {
+        return symbol->type;
+    }
+    else {
+        return -1;
+    }
+}

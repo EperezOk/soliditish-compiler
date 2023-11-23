@@ -181,7 +181,7 @@ FunctionInstruction *EmitEventFunctionInstructionGrammarAction(char *eventIdenti
 	functionInstruction->eventArgs = eventArgs;
 
 	if(typeVariable(eventIdentifier) != DATA_TYPE_EVENT)
-		addError(sprintf(ERR_MSG, "Variable is not an event"));
+		addError(sprintf(ERR_MSG, "%s is not an event", eventIdentifier));
 	return functionInstruction;	
 }
 
@@ -331,7 +331,7 @@ FunctionCall *FunctionCallGrammarAction(char *identifier, Arguments *arguments) 
 	functionCall->arguments = arguments;
 
 	if (typeFunctionCall(functionCall) == -1)
-		addError(sprintf(ERR_MSG, "Variable is not callable"));
+		addError(sprintf(ERR_MSG, "%s is not callable", identifier));
 	return functionCall;
 }
 
@@ -417,8 +417,8 @@ DataType *DataTypeArrayGrammarAction(DataType *dataType, Expression *expression)
 	arrayDataType->expression = expression;
 
 	int typeExp = typeExpression(expression);
-	if (expression != NULL && (typeExp == -1 || (typeExp != DATA_TYPE_INT && typeExp != DATA_TYPE_UINT) )) 
-		addError(sprintf(ERR_MSG, "Incorrect dimension in array initialization."));
+	if (typeExp != DATA_TYPE_UINT) 
+		addError(sprintf(ERR_MSG, "Invalid array size in array initialization."));
 	return arrayDataType;
 }
 

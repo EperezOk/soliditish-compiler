@@ -635,7 +635,7 @@ static void generateConstant(Constant *constant) {
 			output("%s", constant->value ? "true" : "false");
 			break;
 		case CONSTANT_STRING:
-			output("\"%s\"", constant->string);
+			output("%s", constant->string);
 			break;
 		case CONSTANT_ADDRESS:
 		case CONSTANT_SCIENTIFIC_NOTATION:

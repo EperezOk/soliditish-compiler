@@ -1,5 +1,5 @@
 contract TokenMinter {
-   int n = 3 + 3e-1 + 7e-1;
+   uint n = 3 + 3e3 + 7e4;
    int m = -.25e2;
-   int k = 1e2;
+   uint k = 1e2;
 }

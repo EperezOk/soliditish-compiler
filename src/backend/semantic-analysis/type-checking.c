@@ -5,19 +5,21 @@
 int typeAssignment(Assignment *assignment) {
     int assignable = typeAssignable(assignment->assignable);
     int expression = typeExpression(assignment->expression);
+
+    Factor *factor = assignment->expression->factor;
     switch (assignment->type) {
         case ASSIGNMENT_EXPRESSION:
-            if (assignable == expression || (assignable == DATA_TYPE_ERC20 && expression == DATA_TYPE_ADDRESS)
-                                        || (assignable == DATA_TYPE_ERC721 && expression == DATA_TYPE_ADDRESS)
-                                        || (assignable == DATA_TYPE_ADDRESS && expression == DATA_TYPE_ERC20)
-                                        || (assignable == DATA_TYPE_ADDRESS && expression == DATA_TYPE_ERC721)
-                                        || (assignable == DATA_TYPE_BYTES && expression == DATA_TYPE_STRING)
-                                        || (assignable == DATA_TYPE_INT && expression == DATA_TYPE_UINT)
-                                        || (assignable == DATA_TYPE_UINT && expression == DATA_TYPE_INT)) {
+            if (assignable == expression || (assignable == DATA_TYPE_BYTES && assignment->expression->factor != NULL && assignment->expression->factor->constant != NULL && assignment->expression->factor->constant->type == CONSTANT_STRING)
+                                        || (assignable == DATA_TYPE_INT && assignment->expression->factor != NULL && assignment->expression->factor->constant != NULL && assignment->expression->factor->constant->type == CONSTANT_INTEGER)) {
                 return assignable;
             } else {
                 return -1;
             }
+        case ASSIGNMENT_FUNCTION_CALL:
+            if (isBuiltInFunction(assignment->functionCall->identifier))
+                return DATA_TYPE_VOID;
+            else
+                return -1;
         default:
             return -1;
     }
@@ -37,9 +39,8 @@ int typeMathAssignment(MathAssignment *mathAssignment) {
 
             switch(typeExpression(mathAssignment->expression)) {
                 case DATA_TYPE_INT:
-                    return DATA_TYPE_INT;
                 case DATA_TYPE_UINT:
-                    return DATA_TYPE_UINT;
+                    return DATA_TYPE_VOID;
                 default:
                     return -1;
             }
@@ -85,12 +86,10 @@ int typeMemberCall(MemberCall *memberCall) {
     int assignable = typeAssignable(memberCall->instance);
 
     switch(assignable) {
-        case DATA_TYPE_FUNCTION:
-            return DATA_TYPE_FUNCTION;
         case DATA_TYPE_ERC20:
         case DATA_TYPE_ERC721:
             if (strcmp(memberCall->method->identifier, "transfer") == 0)
-                return DATA_TYPE_VOID;
+                return DATA_TYPE_BOOLEAN;
             else
                 return -1;
 
@@ -100,20 +99,17 @@ int typeMemberCall(MemberCall *memberCall) {
 }
 
 int typeVariableDefinition(VariableDefinition *variableDefinition) {
-    if(variableDefinition->expression == NULL && variableDefinition->functionCall == NULL)
+    if(variableDefinition->type == VARIABLE_DEFINITION_DECLARATION)
         return variableDefinition->dataType->type;
 
     int expression = typeExpression(variableDefinition->expression);
 
     if (variableDefinition->dataType->type == expression)
         return variableDefinition->dataType->type;
+
+    Factor *factor = variableDefinition->expression->factor;
     
     switch (variableDefinition->dataType->type) {
-        case DATA_TYPE_ADDRESS:
-            if (expression == DATA_TYPE_ERC20 || expression == DATA_TYPE_ERC721)
-                return variableDefinition->dataType->type;
-            else 
-                return -1;
         case DATA_TYPE_ERC20:
         case DATA_TYPE_ERC721:
             if (expression == DATA_TYPE_ADDRESS)
@@ -121,10 +117,10 @@ int typeVariableDefinition(VariableDefinition *variableDefinition) {
             else 
                 return -1;
         case DATA_TYPE_BYTES:
-            if (expression == DATA_TYPE_STRING)
+            if (factor != NULL && factor->constant != NULL && factor->constant->type == CONSTANT_STRING)
                 return variableDefinition->dataType->type;
         case DATA_TYPE_INT:
-            if (expression == DATA_TYPE_UINT)
+            if (factor != NULL && factor->constant != NULL && factor->constant->type == CONSTANT_INTEGER)
                 return variableDefinition->dataType->type;
         default:
             return -1;
@@ -134,8 +130,8 @@ int typeVariableDefinition(VariableDefinition *variableDefinition) {
 int typeExpression(Expression *expression) {
     if (expression == NULL) return 0;
 
-    int left_type = typeExpression(expression->left);
-    int right_type = typeExpression(expression->right);
+    int leftType = typeExpression(expression->left);
+    int rightType = typeExpression(expression->right);
     switch (expression->type) {
     case EXPRESSION_ADDITION:
     case EXPRESSION_SUBTRACTION:
@@ -143,14 +139,18 @@ int typeExpression(Expression *expression) {
     case EXPRESSION_DIVISION:
     case EXPRESSION_MODULO:
     case EXPRESSION_EXPONENTIATION:
-        if (left_type == DATA_TYPE_UINT && right_type == DATA_TYPE_UINT) {
+        if (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_UINT) {
             return DATA_TYPE_UINT;
-        } else {
+        } else if ((leftType == DATA_TYPE_INT && rightType == DATA_TYPE_INT)
+                    || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)
+                    || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT)){
             return DATA_TYPE_INT;
+        } else {
+            return -1;
         }
     case EXPRESSION_EQUALITY:
     case EXPRESSION_INEQUALITY:
-        if (left_type == right_type) {
+        if (leftType == rightType) {
             return DATA_TYPE_BOOLEAN;
         }
         else {
@@ -160,8 +160,8 @@ int typeExpression(Expression *expression) {
     case EXPRESSION_LESS_THAN_OR_EQUAL:
     case EXPRESSION_GREATER_THAN:
     case EXPRESSION_GREATER_THAN_OR_EQUAL:
-        if (left_type == right_type || (left_type == DATA_TYPE_INT && right_type == DATA_TYPE_UINT) || (left_type == DATA_TYPE_UINT && right_type == DATA_TYPE_INT)) {
-            if (left_type == DATA_TYPE_UINT || left_type == DATA_TYPE_INT) {
+        if (leftType == rightType || (leftType == DATA_TYPE_INT && rightType == DATA_TYPE_UINT) || (leftType == DATA_TYPE_UINT && rightType == DATA_TYPE_INT)) {
+            if (leftType == DATA_TYPE_UINT || leftType == DATA_TYPE_INT) {
                 return DATA_TYPE_BOOLEAN;
             }
             else {
@@ -173,7 +173,7 @@ int typeExpression(Expression *expression) {
         }
     case EXPRESSION_AND:
     case EXPRESSION_OR:
-        if (left_type == DATA_TYPE_BOOLEAN && right_type == DATA_TYPE_BOOLEAN) {
+        if (leftType == DATA_TYPE_BOOLEAN && rightType == DATA_TYPE_BOOLEAN) {
             return DATA_TYPE_BOOLEAN;
         }
         else {
@@ -233,7 +233,7 @@ int typeAssignable(Assignable *assignable) {
     case ASSIGNABLE_VARIABLE:
         return typeVariable(assignable->identifier);
     case ASSIGNABLE_ARRAY:
-        if (typeArrayIndex == -1 || (typeArrayIndex != DATA_TYPE_INT && typeArrayIndex != DATA_TYPE_UINT))
+        if (typeArrayIndex == -1 || typeArrayIndex != DATA_TYPE_UINT)
             return -1;
         return typeVariable(assignable->identifier);
     default:
@@ -242,14 +242,7 @@ int typeAssignable(Assignable *assignable) {
 }
 
 int typeVariable(char *identifier) {
-    SymbolTableEntry *symbol;
-    HASH_FIND_STR(state.symbolTable, identifier, symbol);
-    if (symbol != NULL) {
-        return symbol->type;
-    }
-    else {
-        return -1;
-    }
+    return getSymbolType(identifier);
 }
 
 // check if it is string (scientificc notation), uint or int

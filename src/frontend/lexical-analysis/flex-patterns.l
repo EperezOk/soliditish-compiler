@@ -93,7 +93,7 @@ string          \"[^"]*\"
 
 @public                                     { return DecoratorPatternAction(yytext, yyleng); }
 
--?{digit}*\.?{digit}+[eE]-?{digit}+         { return StringValuePatternAction(yytext, yyleng, SCIENTIFIC_NOTATION); }
+-?{digit}*\.?{digit}+[eE]{digit}+           { return StringValuePatternAction(yytext, yyleng, SCIENTIFIC_NOTATION); }
 -?{digit}+									{ return IntegerPatternAction(yytext, yyleng); }
 
 {boolean}                                   { return StringValuePatternAction(yytext, yyleng, BOOLEAN); }

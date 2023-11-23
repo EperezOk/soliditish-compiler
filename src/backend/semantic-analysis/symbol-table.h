@@ -12,4 +12,6 @@ void removeSymbol(char *identifier);
 
 void freeSymbolTable();
 
+int getSymbolType(char *identifier);
+
 #endif
