@@ -1,6 +1,45 @@
-# EVM Compiler
+# Soliditish Compiler
 
 A compiler for a language to create smart contracts, that is transpiled to Solidity.
+
+## Sample contract
+
+The following is a smart contract written in Soliditish, that creates minimal proxies of an NFT contract:
+
+```solidity
+contract NFTFactory {
+
+    ERC721 nftContract = 0x24862BDE3581a23552CE4EE712614550d7aE49FC;
+
+    event NewCollection(address proxy);
+
+    // @notice decorators are used to specify the visibility of the function
+    @public
+    function deployNewCollections(uint amount) {
+        address[amount] newCollections;
+
+        uint i;
+
+        if (amount > 0) {
+            for (i = 0; i < amount; i++) {
+                // out-of-the-box support for creating minimal proxies
+                address tokenClone = createProxyTo(nftContract);
+
+                newCollections[i] = tokenClone;
+
+                // out-of-the-box support for logging
+                log("New Token Clone:", newCollections[i]);
+                emit NewCollection(newCollections[i]);
+            }
+        } else {
+            log("Amount must be greater than 0");
+        }
+    }
+
+}
+```
+
+See more examples in the [test/accept](test/accept) folder.
 
 ## Requirements
 
